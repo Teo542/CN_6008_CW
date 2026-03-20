@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CityFix</string>
+
+    <!-- Navigation -->
+    <string name="nav_map">Map</string>
+    <string name="nav_feed">Feed</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Auth -->
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="display_name">Display Name</string>
+    <string name="sign_in">Sign In</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_account">Already have an account? Sign In</string>
+    <string name="no_account">Don\'t have an account? Register</string>
+
+    <!-- Map -->
+    <string name="submit_report">Submit Report</string>
+    <string name="filter_all">All</string>
+    <string name="filter_open">Open</string>
+    <string name="filter_in_progress">In Progress</string>
+    <string name="filter_resolved">Resolved</string>
+
+    <!-- Report -->
+    <string name="report_title">Title</string>
+    <string name="report_description">Description</string>
+    <string name="report_category">Category</string>
+    <string name="report_location">Location</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="submit">Submit</string>
+
+    <!-- Categories -->
+    <string name="category_pothole">Pothole</string>
+    <string name="category_streetlight">Streetlight</string>
+    <string name="category_flooding">Flooding</string>
+    <string name="category_vandalism">Vandalism</string>
+    <string name="category_other">Other</string>
+
+    <!-- Status -->
+    <string name="status_open">Open</string>
+    <string name="status_in_progress">In Progress</string>
+    <string name="status_resolved">Resolved</string>
+
+    <!-- Profile -->
+    <string name="sign_out">Sign Out</string>
+    <string name="admin_dashboard">Admin Dashboard</string>
+    <string name="reports_submitted">Reports Submitted</string>
+
+    <!-- IMPORTANT: Replace with your actual Google Maps API key -->
+    <string name="maps_api_key">YOUR_MAPS_API_KEY_HERE</string>
+</resources>

@@ -1,0 +1,17 @@
+# Android
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Secrets - NEVER commit these
+google-services.json
+local.properties
+
+# Gradle
+gradle/wrapper/gradle-wrapper.jar

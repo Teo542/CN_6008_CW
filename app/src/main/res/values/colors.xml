@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#1976D2</color>
+    <color name="primary_dark">#1565C0</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#FF5722</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="background">#F5F5F5</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <!-- Status colors -->
+    <color name="status_open">#F44336</color>
+    <color name="status_in_progress">#FF9800</color>
+    <color name="status_resolved">#4CAF50</color>
+
+    <!-- Category colors -->
+    <color name="category_pothole">#795548</color>
+    <color name="category_streetlight">#FFC107</color>
+    <color name="category_flooding">#2196F3</color>
+    <color name="category_vandalism">#9C27B0</color>
+    <color name="category_other">#607D8B</color>
+</resources>
