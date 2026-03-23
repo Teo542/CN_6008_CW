@@ -58,6 +58,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvCategory, tvStatus, tvTitle, tvAddress, tvReporter, tvTime;
+        View statusBar;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -67,6 +68,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             tvAddress = itemView.findViewById(R.id.tv_address);
             tvReporter = itemView.findViewById(R.id.tv_reporter);
             tvTime = itemView.findViewById(R.id.tv_time);
+            statusBar = itemView.findViewById(R.id.status_bar);
         }
 
         void bind(FaultReport report) {
@@ -75,6 +77,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             tvStatus.setText(report.getStatus().replace("_", " ").toUpperCase());
             tvAddress.setText(report.getAddress() != null ? report.getAddress() : "Unknown location");
             tvReporter.setText("By " + report.getUserName());
+            statusBar.setBackgroundColor(statusColor(report.getStatus()));
 
             if (report.getTimestamp() != null) {
                 Date date = report.getTimestamp().toDate();
