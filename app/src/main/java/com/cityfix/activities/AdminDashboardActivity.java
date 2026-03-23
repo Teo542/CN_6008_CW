@@ -9,6 +9,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cityfix.utils.Constants;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,6 +30,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private RecyclerView recycler;
     private AdminAdapter adapter;
     private final ReportRepository repo = new ReportRepository();
+    private TextView tvCountOpen, tvCountInProgress, tvCountResolved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
             getSupportActionBar().setTitle("Admin Dashboard");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        tvCountOpen = findViewById(R.id.tv_count_open);
+        tvCountInProgress = findViewById(R.id.tv_count_in_progress);
+        tvCountResolved = findViewById(R.id.tv_count_resolved);
 
         recycler = findViewById(R.id.recycler_admin_reports);
         adapter = new AdminAdapter(new ArrayList<>(), (reportId, status) -> {
@@ -66,7 +73,22 @@ public class AdminDashboardActivity extends AppCompatActivity {
                     }
                 }
                 adapter.update(list);
+                updateStats(list);
             });
+    }
+
+    private void updateStats(List<FaultReport> list) {
+        int open = 0, inProgress = 0, resolved = 0;
+        for (FaultReport r : list) {
+            switch (r.getStatus()) {
+                case Constants.STATUS_OPEN: open++; break;
+                case Constants.STATUS_IN_PROGRESS: inProgress++; break;
+                case Constants.STATUS_RESOLVED: resolved++; break;
+            }
+        }
+        tvCountOpen.setText(String.valueOf(open));
+        tvCountInProgress.setText(String.valueOf(inProgress));
+        tvCountResolved.setText(String.valueOf(resolved));
     }
 
     @Override
