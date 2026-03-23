@@ -80,6 +80,23 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
+        <!-- My Reports section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:text="My Reports"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_my_reports"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:layout_marginBottom="16dp" />
+
         <!-- Admin button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_admin_dashboard"

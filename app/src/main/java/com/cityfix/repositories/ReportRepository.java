@@ -57,6 +57,24 @@ public class ReportRepository {
                 });
     }
 
+    public void listenToUserReports(String userId, MutableLiveData<List<FaultReport>> liveData) {
+        db.collection(Constants.COLLECTION_REPORTS)
+                .whereEqualTo("userId", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null || snapshots == null) return;
+                    List<FaultReport> reports = new ArrayList<>();
+                    for (var doc : snapshots.getDocuments()) {
+                        FaultReport report = doc.toObject(FaultReport.class);
+                        if (report != null) {
+                            report.setReportId(doc.getId());
+                            reports.add(report);
+                        }
+                    }
+                    liveData.postValue(reports);
+                });
+    }
+
     public void removeListener() {
         if (listenerRegistration != null) {
             listenerRegistration.remove();
