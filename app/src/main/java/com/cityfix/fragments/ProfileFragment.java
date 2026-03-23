@@ -37,7 +37,7 @@ public class ProfileFragment extends Fragment {
     private ReportAdapter myReportsAdapter;
     private MutableLiveData<List<FaultReport>> myReportsLiveData = new MutableLiveData<>();
 
-    private TextView tvAvatar, tvDisplayName, tvEmail, tvReportsCount;
+    private TextView tvAvatar, tvDisplayName, tvEmail, tvReportsCount, tvMyReportsEmpty;
     private MaterialButton btnAdminDashboard, btnSignOut;
 
     @Nullable
@@ -67,7 +67,12 @@ public class ProfileFragment extends Fragment {
         recyclerMyReports.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerMyReports.setAdapter(myReportsAdapter);
 
-        myReportsLiveData.observe(getViewLifecycleOwner(), reports -> myReportsAdapter.updateReports(reports));
+        tvMyReportsEmpty = view.findViewById(R.id.tv_my_reports_empty);
+
+        myReportsLiveData.observe(getViewLifecycleOwner(), reports -> {
+            myReportsAdapter.updateReports(reports);
+            tvMyReportsEmpty.setVisibility(reports.isEmpty() ? View.VISIBLE : View.GONE);
+        });
 
         loadUserProfile();
         setupButtons();

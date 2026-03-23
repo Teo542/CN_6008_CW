@@ -7,6 +7,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +33,7 @@ public class FeedFragment extends Fragment {
     private SwipeRefreshLayout swipeRefresh;
     private ReportAdapter adapter;
     private List<FaultReport> allReports = new ArrayList<>();
+    private LinearLayout layoutEmpty;
 
     @Nullable
     @Override
@@ -47,6 +49,7 @@ public class FeedFragment extends Fragment {
 
         recyclerReports = view.findViewById(R.id.recycler_reports);
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
+        layoutEmpty = view.findViewById(R.id.layout_empty);
 
         adapter = new ReportAdapter(new ArrayList<>(), this::openDetail);
         recyclerReports.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -77,19 +80,21 @@ public class FeedFragment extends Fragment {
     }
 
     private void applySearch(String query) {
+        List<FaultReport> result;
         if (query.isEmpty()) {
-            adapter.updateReports(allReports);
-            return;
-        }
-        String lower = query.toLowerCase();
-        List<FaultReport> filtered = new ArrayList<>();
-        for (FaultReport r : allReports) {
-            if (r.getTitle().toLowerCase().contains(lower)
-                    || r.getCategory().toLowerCase().contains(lower)) {
-                filtered.add(r);
+            result = allReports;
+        } else {
+            String lower = query.toLowerCase();
+            result = new ArrayList<>();
+            for (FaultReport r : allReports) {
+                if (r.getTitle().toLowerCase().contains(lower)
+                        || r.getCategory().toLowerCase().contains(lower)) {
+                    result.add(r);
+                }
             }
         }
-        adapter.updateReports(filtered);
+        adapter.updateReports(result);
+        layoutEmpty.setVisibility(result.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void openDetail(FaultReport report) {
