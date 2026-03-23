@@ -8,14 +8,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.MutableLiveData;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cityfix.R;
+import com.cityfix.adapters.CommentAdapter;
+import com.cityfix.models.Comment;
 import com.cityfix.models.StatusUpdate;
 import com.cityfix.repositories.ReportRepository;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class ReportDetailActivity extends AppCompatActivity {
@@ -25,6 +35,9 @@ public class ReportDetailActivity extends AppCompatActivity {
     private TextView tvUpvoteCount;
     private LinearLayout llStatusHistory;
     private TextView tvHistoryEmpty;
+    private CommentAdapter commentAdapter;
+    private TextView tvCommentsEmpty;
+    private MutableLiveData<List<Comment>> commentsLiveData = new MutableLiveData<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,22 +66,35 @@ public class ReportDetailActivity extends AppCompatActivity {
         tvUpvoteCount = findViewById(R.id.tv_upvote_count);
         llStatusHistory = findViewById(R.id.ll_status_history);
         tvHistoryEmpty = findViewById(R.id.tv_history_empty);
+        tvCommentsEmpty = findViewById(R.id.tv_comments_empty);
         MaterialButton btnUpvote = findViewById(R.id.btn_upvote);
 
         tvTitle.setText(title);
         tvDescription.setText(description);
         tvAddress.setText(address != null ? address : "Location unavailable");
         tvReporter.setText("Reported by: " + userName);
-
         tvCategory.setText(category != null ? category.toUpperCase() : "");
         tvStatus.setText(status != null ? status.replace("_", " ").toUpperCase() : "");
-
         tvStatus.getBackground().setTint(statusColor(status));
         tvCategory.getBackground().setTint(categoryColor(category));
+
+        // Comments RecyclerView
+        RecyclerView recyclerComments = findViewById(R.id.recycler_comments);
+        commentAdapter = new CommentAdapter(new ArrayList<>());
+        recyclerComments.setLayoutManager(new LinearLayoutManager(this));
+        recyclerComments.setAdapter(commentAdapter);
+
+        commentsLiveData.observe(this, comments -> {
+            commentAdapter.updateComments(comments);
+            tvCommentsEmpty.setVisibility(comments.isEmpty() ? View.VISIBLE : View.GONE);
+        });
 
         reportRepository = new ReportRepository();
         loadUpvotes();
         loadStatusHistory();
+        if (reportId != null) {
+            reportRepository.listenToComments(reportId, commentsLiveData);
+        }
 
         btnUpvote.setOnClickListener(v -> {
             if (reportId == null) return;
@@ -78,6 +104,32 @@ public class ReportDetailActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> {
                         btnUpvote.setEnabled(true);
                         Toast.makeText(this, "Failed to upvote", Toast.LENGTH_SHORT).show();
+                    });
+        });
+
+        // Send comment
+        TextInputEditText etComment = findViewById(R.id.et_comment);
+        MaterialButton btnSend = findViewById(R.id.btn_send_comment);
+        btnSend.setOnClickListener(v -> {
+            if (etComment.getText() == null) return;
+            String text = etComment.getText().toString().trim();
+            if (text.isEmpty() || reportId == null) return;
+
+            FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = fbUser != null ? fbUser.getUid() : "";
+            String name = fbUser != null && fbUser.getDisplayName() != null
+                    ? fbUser.getDisplayName() : "User";
+
+            btnSend.setEnabled(false);
+            Comment comment = new Comment(text, uid, name, false);
+            reportRepository.addComment(reportId, comment)
+                    .addOnSuccessListener(ref -> {
+                        etComment.setText("");
+                        btnSend.setEnabled(true);
+                    })
+                    .addOnFailureListener(e -> {
+                        btnSend.setEnabled(true);
+                        Toast.makeText(this, "Failed to post comment", Toast.LENGTH_SHORT).show();
                     });
         });
     }

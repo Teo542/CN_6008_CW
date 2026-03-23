@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.cityfix.models.FaultReport;
 import com.cityfix.utils.Constants;
+import com.cityfix.models.Comment;
 import com.cityfix.models.StatusUpdate;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
@@ -57,6 +58,32 @@ public class ReportRepository {
                         }
                     }
                     liveData.postValue(reports);
+                });
+    }
+
+    public Task<DocumentReference> addComment(String reportId, Comment comment) {
+        return db.collection(Constants.COLLECTION_REPORTS)
+                .document(reportId)
+                .collection(Constants.COLLECTION_COMMENTS)
+                .add(comment);
+    }
+
+    public void listenToComments(String reportId, MutableLiveData<List<Comment>> liveData) {
+        db.collection(Constants.COLLECTION_REPORTS)
+                .document(reportId)
+                .collection(Constants.COLLECTION_COMMENTS)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .addSnapshotListener((snapshots, error) -> {
+                    if (error != null || snapshots == null) return;
+                    List<Comment> list = new ArrayList<>();
+                    for (var doc : snapshots.getDocuments()) {
+                        Comment c = doc.toObject(Comment.class);
+                        if (c != null) {
+                            c.setCommentId(doc.getId());
+                            list.add(c);
+                        }
+                    }
+                    liveData.postValue(list);
                 });
     }
 
