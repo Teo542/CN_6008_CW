@@ -94,6 +94,16 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
     }
 
     private void requestLocationAndDetect() {
+        // Use map centre coordinates if passed from MapFragment
+        android.os.Bundle args = getArguments();
+        if (args != null && args.containsKey("lat")) {
+            currentLat = args.getDouble("lat");
+            currentLng = args.getDouble("lng");
+            currentAddress = locationHelper.getAddressFromLatLng(currentLat, currentLng);
+            tvLocation.setText("📍 " + currentAddress);
+            return;
+        }
+
         if (ContextCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             detectLocation();
@@ -111,7 +121,6 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
                 currentAddress = locationHelper.getAddressFromLatLng(currentLat, currentLng);
                 tvLocation.setText("📍 " + currentAddress);
             } else {
-                // Fallback to Athens centre for demo
                 currentLat = 37.9838;
                 currentLng = 23.7275;
                 currentAddress = "Athens, Greece (approximate)";

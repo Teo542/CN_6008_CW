@@ -119,6 +119,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void openSubmitReport() {
-        new SubmitReportFragment().show(getChildFragmentManager(), "submit_report");
+        SubmitReportFragment fragment = new SubmitReportFragment();
+        if (googleMap != null) {
+            android.os.Bundle args = new android.os.Bundle();
+            com.google.android.gms.maps.model.LatLng centre = googleMap.getCameraPosition().target;
+            args.putDouble("lat", centre.latitude);
+            args.putDouble("lng", centre.longitude);
+            fragment.setArguments(args);
+        }
+        fragment.show(getChildFragmentManager(), "submit_report");
     }
 }
