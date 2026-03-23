@@ -55,6 +55,23 @@
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
+    <!-- Centre crosshair — pan map to aim, tap + to report -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:pointerIcon="crosshair">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📍"
+            android:textSize="32sp"
+            android:translationY="-16dp" />
+    </LinearLayout>
+
     <!-- FAB to submit report -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_submit"
