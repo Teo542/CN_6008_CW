@@ -1,19 +1,12 @@
 package com.cityfix.fragments;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.TextView;
-
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -62,16 +55,8 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        Dialog dialog = getDialog();
-        if (dialog != null) {
-            FrameLayout bottomSheet = dialog.findViewById(
-                    com.google.android.material.R.id.design_bottom_sheet);
-            if (bottomSheet != null) {
-                bottomSheet.setBackground(new ColorDrawable(Color.TRANSPARENT));
-            }
-        }
+    public int getTheme() {
+        return R.style.TransparentBottomSheetDialog;
     }
 
     @Override
@@ -124,10 +109,20 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
                 currentLat = location.getLatitude();
                 currentLng = location.getLongitude();
                 currentAddress = locationHelper.getAddressFromLatLng(currentLat, currentLng);
-                tvLocation.setText(currentAddress);
+                tvLocation.setText("📍 " + currentAddress);
             } else {
-                tvLocation.setText("Could not detect location");
+                // Fallback to Athens centre for demo
+                currentLat = 37.9838;
+                currentLng = 23.7275;
+                currentAddress = "Athens, Greece (approximate)";
+                tvLocation.setText("📍 " + currentAddress);
             }
+        }).addOnFailureListener(e -> {
+            if (!isAdded()) return;
+            currentLat = 37.9838;
+            currentLng = 23.7275;
+            currentAddress = "Athens, Greece (approximate)";
+            tvLocation.setText("📍 " + currentAddress);
         });
     }
 
@@ -140,8 +135,9 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
             return;
         }
         if (currentLat == 0 && currentLng == 0) {
-            showError("Location not detected yet.");
-            return;
+            currentLat = 37.9838;
+            currentLng = 23.7275;
+            currentAddress = "Athens, Greece (approximate)";
         }
 
         String uid = userRepository.getCurrentUserId();
