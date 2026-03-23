@@ -6,6 +6,8 @@ import com.cityfix.models.FaultReport;
 import com.cityfix.utils.Constants;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -55,6 +57,16 @@ public class ReportRepository {
                     }
                     liveData.postValue(reports);
                 });
+    }
+
+    public Task<Void> upvoteReport(String reportId) {
+        return db.collection(Constants.COLLECTION_REPORTS)
+                .document(reportId)
+                .update("upvotes", FieldValue.increment(1));
+    }
+
+    public Task<DocumentSnapshot> getReport(String reportId) {
+        return db.collection(Constants.COLLECTION_REPORTS).document(reportId).get();
     }
 
     public void listenToUserReports(String userId, MutableLiveData<List<FaultReport>> liveData) {
