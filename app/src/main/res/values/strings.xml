@@ -52,5 +52,5 @@
     <string name="reports_submitted">Reports Submitted</string>
 
     <!-- IMPORTANT: Replace with your actual Google Maps API key -->
-    <string name="maps_api_key">YOUR_MAPS_API_KEY_HERE</string>
+    <string name="maps_api_key">AIzaSyA7bgJKK5QiVoRo9s6Okk4l7kdjgDtgW8Y</string>
 </resources>
