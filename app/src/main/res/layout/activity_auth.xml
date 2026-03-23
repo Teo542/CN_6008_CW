@@ -88,8 +88,8 @@
                 android:layout_marginBottom="12dp"
                 android:hint="@string/display_name"
                 android:visibility="gone"
-                app:boxBackgroundColor="#1E1E32"
-                app:boxStrokeColor="#3A3A5A"
+                app:boxBackgroundColor="#2D2D4A"
+                app:boxStrokeColor="#5A5A8A"
                 app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -109,8 +109,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:hint="@string/email"
-                app:boxBackgroundColor="#1E1E32"
-                app:boxStrokeColor="#3A3A5A"
+                app:boxBackgroundColor="#2D2D4A"
+                app:boxStrokeColor="#5A5A8A"
                 app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -131,8 +131,8 @@
                 android:layout_marginBottom="12dp"
                 android:hint="@string/password"
                 app:passwordToggleEnabled="true"
-                app:boxBackgroundColor="#1E1E32"
-                app:boxStrokeColor="#3A3A5A"
+                app:boxBackgroundColor="#2D2D4A"
+                app:boxStrokeColor="#5A5A8A"
                 app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -154,8 +154,8 @@
                 android:hint="@string/confirm_password"
                 android:visibility="gone"
                 app:passwordToggleEnabled="true"
-                app:boxBackgroundColor="#1E1E32"
-                app:boxStrokeColor="#3A3A5A"
+                app:boxBackgroundColor="#2D2D4A"
+                app:boxStrokeColor="#5A5A8A"
                 app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
