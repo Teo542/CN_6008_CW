@@ -8,103 +8,103 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <!-- Blue header banner -->
+        <!-- Avatar section -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:background="@color/primary"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp">
 
-            <TextView
-                android:id="@+id/tv_avatar"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:background="@drawable/circle_avatar"
-                android:gravity="center"
-                android:textColor="@color/white"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+            <LinearLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/circle_orange"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/tv_avatar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_display_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/white"
-                android:textSize="18sp"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tv_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#B3FFFFFF"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
         </LinearLayout>
 
         <!-- Stats card -->
-        <androidx.cardview.widget.CardView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:id="@+id/tv_reports_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"
-                    android:textColor="@color/primary"
-                    android:textSize="36sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/reports_submitted"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@drawable/dark_card"
+            android:gravity="center"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp">
+            android:padding="24dp"
+            android:layout_marginBottom="16dp">
 
-            <!-- Admin button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_admin_dashboard"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_reports_count"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="@string/admin_dashboard"
-                android:visibility="gone" />
+                android:text="0"
+                android:textColor="@color/primary"
+                android:textSize="40sp"
+                android:textStyle="bold" />
 
-            <!-- Sign out -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_sign_out"
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:backgroundTint="#F44336"
-                android:text="@string/sign_out"
-                android:textColor="@color/white" />
-
+                android:text="@string/reports_submitted"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
         </LinearLayout>
+
+        <!-- Admin button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_admin_dashboard"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginBottom="10dp"
+            android:text="@string/admin_dashboard"
+            android:textColor="@color/primary"
+            android:visibility="gone"
+            app:strokeColor="@color/primary"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            app:cornerRadius="12dp" />
+
+        <!-- Sign out -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_sign_out"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="@string/sign_out"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:backgroundTint="@color/status_open"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            app:cornerRadius="12dp" />
 
     </LinearLayout>
 </ScrollView>

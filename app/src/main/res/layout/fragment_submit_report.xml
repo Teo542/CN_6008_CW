@@ -5,49 +5,50 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/auth_card_background"
-    android:padding="16dp">
+    android:background="@drawable/dark_card_top"
+    android:padding="20dp">
 
     <!-- Drag handle -->
     <View
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         android:background="@drawable/drag_handle" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="4dp"
         android:text="Report an Issue"
-        android:textSize="20sp"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="@color/text_primary"/>
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="4dp"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:text="Help improve your city"
         android:textSize="13sp"
-        android:textColor="@color/text_secondary"/>
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="20dp"/>
 
     <!-- Category -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Category"
+        android:text="CATEGORY"
         android:textColor="@color/text_secondary"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:textStyle="bold"
-        android:layout_marginBottom="6dp"/>
+        android:letterSpacing="0.1"
+        android:layout_marginBottom="8dp"/>
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chip_group_category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="20dp"
         app:singleSelection="true">
 
         <com.google.android.material.chip.Chip
@@ -55,36 +56,40 @@
             style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🕳 Pothole" />
+            android:text="🕳 Pothole"
+            android:textColor="@color/text_primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_streetlight"
             style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="💡 Streetlight" />
+            android:text="💡 Streetlight"
+            android:textColor="@color/text_primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_flooding"
             style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🌊 Flooding" />
+            android:text="🌊 Flooding"
+            android:textColor="@color/text_primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_vandalism"
             style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔨 Vandalism" />
+            android:text="🔨 Vandalism"
+            android:textColor="@color/text_primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_other"
             style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📌 Other" />
-
+            android:text="📌 Other"
+            android:textColor="@color/text_primary" />
     </com.google.android.material.chip.ChipGroup>
 
     <!-- Title -->
@@ -94,13 +99,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:hint="Title (e.g. Large pothole on main road)">
+        android:hint="Title"
+        app:boxStrokeColor="@color/surface_variant"
+        app:hintTextColor="@color/text_secondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:inputType="text"
+            android:textColor="@color/text_primary" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Description -->
@@ -110,25 +118,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
-        android:hint="Description">
+        android:hint="Description"
+        app:boxStrokeColor="@color/surface_variant"
+        app:hintTextColor="@color/text_secondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
-            android:minLines="2" />
+            android:minLines="2"
+            android:textColor="@color/text_primary" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Location status -->
+    <!-- Location pill -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:background="@color/primary_light"
-        android:padding="10dp"
-        android:layout_marginBottom="16dp">
+        android:background="@drawable/dark_card"
+        android:padding="12dp"
+        android:layout_marginBottom="20dp">
 
         <TextView
             android:id="@+id/tv_location"
@@ -136,7 +147,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="📍 Detecting location..."
-            android:textColor="@color/primary_dark"
+            android:textColor="@color/text_secondary"
             android:textSize="13sp" />
     </LinearLayout>
 
@@ -145,16 +156,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:textColor="#F44336"
+        android:textColor="@color/status_open"
         android:visibility="gone" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_submit"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_marginBottom="8dp"
         android:text="Submit Report"
-        android:padding="14dp"
-        android:textSize="15sp" />
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/primary"
+        app:cornerRadius="14dp" />
 
 </LinearLayout>

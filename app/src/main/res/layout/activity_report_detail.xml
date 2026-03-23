@@ -9,14 +9,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp"
+        android:paddingTop="24dp">
 
         <!-- Status + Category badges -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="16dp">
 
             <TextView
                 android:id="@+id/tv_category"
@@ -25,7 +26,8 @@
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="11sp"
+                android:textAllCaps="true"
                 android:background="@drawable/badge_background"
                 android:layout_marginEnd="8dp" />
 
@@ -36,7 +38,8 @@
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="6dp"
                 android:textColor="@color/white"
-                android:textSize="12sp"
+                android:textSize="11sp"
+                android:textAllCaps="true"
                 android:background="@drawable/badge_background" />
         </LinearLayout>
 
@@ -45,7 +48,7 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
             android:layout_marginBottom="8dp" />
@@ -57,33 +60,35 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:textColor="@color/text_secondary"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="24dp" />
 
-        <!-- Description label -->
-        <TextView
+        <!-- Description card -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Description"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="@color/text_secondary"
-            android:layout_marginBottom="4dp" />
+            android:background="@drawable/dark_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
 
-        <!-- Description -->
-        <TextView
-            android:id="@+id/tv_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="15sp"
-            android:textColor="@color/text_primary"
-            android:layout_marginBottom="16dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="DESCRIPTION"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="8dp" />
 
-        <!-- Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/primary_light"
-            android:layout_marginBottom="12dp" />
+            <TextView
+                android:id="@+id/tv_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:lineSpacingMultiplier="1.4"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
 
         <!-- Reporter -->
         <TextView
@@ -91,7 +96,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="13sp"
-            android:textColor="@color/text_secondary" />
+            android:textColor="@color/text_hint" />
 
     </LinearLayout>
 </ScrollView>

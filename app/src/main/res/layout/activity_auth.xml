@@ -1,49 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary">
+    android:background="@color/background"
+    android:orientation="vertical">
 
-    <!-- Blue header -->
+    <!-- Top section: logo + title -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="260dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="64dp">
 
-        <ImageView
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:src="@drawable/ic_map"
-            android:tint="@color/white" />
+        <!-- Orange circle icon -->
+        <LinearLayout
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/circle_orange"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_map"
+                android:tint="@color/white" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="CityFix"
-            android:textColor="@color/white"
-            android:textSize="32sp"
+            android:textColor="@color/text_primary"
+            android:textSize="34sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="6dp"
             android:text="Report. Track. Resolve."
-            android:textColor="#B3FFFFFF"
-            android:textSize="14sp" />
+            android:textColor="@color/text_secondary"
+            android:textSize="15sp" />
     </LinearLayout>
 
-    <!-- White card form -->
+    <!-- Bottom form card -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="220dp"
-        android:background="@drawable/auth_card_background"
-        android:fillViewport="true">
+        android:layout_height="wrap_content"
+        android:background="@drawable/dark_card_top"
+        android:fillViewport="false">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,11 +66,19 @@
                 android:id="@+id/tv_form_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="6dp"
                 android:text="Welcome back"
                 android:textColor="@color/text_primary"
-                android:textSize="22sp"
+                android:textSize="24sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="Sign in to continue"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
 
             <!-- Display name (register only) -->
             <com.google.android.material.textfield.TextInputLayout
@@ -70,13 +88,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:hint="@string/display_name"
-                android:visibility="gone">
+                android:visibility="gone"
+                app:boxStrokeColor="@color/surface_variant"
+                app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_display_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName" />
+                    android:inputType="textPersonName"
+                    android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Email -->
@@ -86,13 +107,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
-                android:hint="@string/email">
+                android:hint="@string/email"
+                app:boxStrokeColor="@color/surface_variant"
+                app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Password -->
@@ -103,16 +127,19 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
                 android:hint="@string/password"
-                app:passwordToggleEnabled="true">
+                app:passwordToggleEnabled="true"
+                app:boxStrokeColor="@color/surface_variant"
+                app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Confirm password (register only) -->
+            <!-- Confirm password -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_confirm_password"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -121,13 +148,16 @@
                 android:layout_marginBottom="12dp"
                 android:hint="@string/confirm_password"
                 android:visibility="gone"
-                app:passwordToggleEnabled="true">
+                app:passwordToggleEnabled="true"
+                app:boxStrokeColor="@color/surface_variant"
+                app:hintTextColor="@color/text_secondary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_confirm_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:textColor="@color/text_primary" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -135,18 +165,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:textColor="#F44336"
-                android:textSize="14sp"
+                android:textColor="@color/status_open"
+                android:textSize="13sp"
                 android:visibility="gone" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_primary"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="56dp"
                 android:layout_marginTop="8dp"
-                android:padding="14dp"
                 android:text="@string/sign_in"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="14dp" />
 
             <TextView
                 android:id="@+id/tv_toggle"
@@ -154,6 +186,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
                 android:text="@string/no_account"
                 android:textColor="@color/primary"
                 android:textSize="14sp" />
@@ -161,4 +194,4 @@
         </LinearLayout>
     </ScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>
