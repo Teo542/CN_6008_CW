@@ -1,7 +1,11 @@
 package com.cityfix.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.TextView;
 
@@ -25,7 +29,7 @@ public class AuthActivity extends AppCompatActivity {
     private TextInputLayout tilDisplayName, tilEmail, tilPassword, tilConfirmPassword;
     private TextInputEditText etDisplayName, etEmail, etPassword, etConfirmPassword;
     private MaterialButton btnPrimary;
-    private TextView tvError, tvToggle;
+    private TextView tvError, tvToggle, tvFormTitle, tvFormSubtitle;
 
     private boolean isLoginMode = true;
 
@@ -37,13 +41,13 @@ public class AuthActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         userRepository = new UserRepository();
 
-        // If already signed in, go to main
         if (auth.getCurrentUser() != null) {
             goToMain();
             return;
         }
 
         bindViews();
+        updateFormMode();
         setupToggle();
         setupPrimaryButton();
     }
@@ -60,6 +64,8 @@ public class AuthActivity extends AppCompatActivity {
         btnPrimary = findViewById(R.id.btn_primary);
         tvError = findViewById(R.id.tv_error);
         tvToggle = findViewById(R.id.tv_toggle);
+        tvFormTitle = findViewById(R.id.tv_form_title);
+        tvFormSubtitle = findViewById(R.id.tv_form_subtitle);
     }
 
     private void setupToggle() {
@@ -74,23 +80,40 @@ public class AuthActivity extends AppCompatActivity {
             tilDisplayName.setVisibility(View.GONE);
             tilConfirmPassword.setVisibility(View.GONE);
             btnPrimary.setText(R.string.sign_in);
-            tvToggle.setText(R.string.no_account);
+            tvFormTitle.setText("Welcome back");
+            tvFormSubtitle.setText("Sign in to continue");
+            setToggleText("Don't have an account? ", "Register");
         } else {
             tilDisplayName.setVisibility(View.VISIBLE);
             tilConfirmPassword.setVisibility(View.VISIBLE);
             btnPrimary.setText(R.string.create_account);
-            tvToggle.setText(R.string.already_have_account);
+            tvFormTitle.setText("Create Account");
+            tvFormSubtitle.setText("Join CityFix today");
+            setToggleText("Already have an account? ", "Sign In");
         }
         tvError.setVisibility(View.GONE);
     }
 
+    private void setToggleText(String plain, String colored) {
+        String full = plain + colored;
+        SpannableString spannable = new SpannableString(full);
+        spannable.setSpan(
+                new ForegroundColorSpan(Color.parseColor("#9E9EB8")),
+                0, plain.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+        spannable.setSpan(
+                new ForegroundColorSpan(Color.parseColor("#FF6B35")),
+                plain.length(), full.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+        tvToggle.setText(spannable);
+    }
+
     private void setupPrimaryButton() {
         btnPrimary.setOnClickListener(v -> {
-            if (isLoginMode) {
-                attemptLogin();
-            } else {
-                attemptRegister();
-            }
+            if (isLoginMode) attemptLogin();
+            else attemptRegister();
         });
     }
 
@@ -139,18 +162,12 @@ public class AuthActivity extends AppCompatActivity {
                     FirebaseUser firebaseUser = result.getUser();
                     if (firebaseUser == null) return;
 
-                    User user = new User(
-                            firebaseUser.getUid(),
-                            displayName,
-                            email,
-                            Constants.ROLE_CITIZEN
-                    );
-
+                    User user = new User(firebaseUser.getUid(), displayName, email, Constants.ROLE_CITIZEN);
                     userRepository.createUser(user)
                             .addOnSuccessListener(v -> goToMain())
                             .addOnFailureListener(e -> {
                                 setLoading(false);
-                                showError("Account created but profile save failed: " + e.getMessage());
+                                showError("Account created but profile save failed.");
                             });
                 })
                 .addOnFailureListener(e -> {
