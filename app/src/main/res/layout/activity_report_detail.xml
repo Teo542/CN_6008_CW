@@ -132,5 +132,41 @@
 
         </LinearLayout>
 
+        <!-- Status History section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/dark_card"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="STATUS HISTORY"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="10dp" />
+
+            <LinearLayout
+                android:id="@+id/ll_status_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tv_history_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="No status changes yet."
+                android:textColor="@color/text_hint"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
     </LinearLayout>
 </ScrollView>

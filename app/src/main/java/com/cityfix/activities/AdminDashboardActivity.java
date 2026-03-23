@@ -18,7 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cityfix.R;
 import com.cityfix.models.FaultReport;
+import com.cityfix.models.StatusUpdate;
 import com.cityfix.repositories.ReportRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
@@ -47,9 +50,14 @@ public class AdminDashboardActivity extends AppCompatActivity {
         tvCountResolved = findViewById(R.id.tv_count_resolved);
 
         recycler = findViewById(R.id.recycler_admin_reports);
-        adapter = new AdminAdapter(new ArrayList<>(), (reportId, status) -> {
-            repo.updateStatus(reportId, status)
-                .addOnSuccessListener(v -> Toast.makeText(this, "Status updated", Toast.LENGTH_SHORT).show())
+        adapter = new AdminAdapter(new ArrayList<>(), (reportId, prevStatus, newStatus) -> {
+            repo.updateStatus(reportId, newStatus)
+                .addOnSuccessListener(v -> {
+                    Toast.makeText(this, "Status updated", Toast.LENGTH_SHORT).show();
+                    String adminName = getAdminName();
+                    StatusUpdate update = new StatusUpdate(prevStatus, newStatus, adminName, null);
+                    repo.addStatusUpdate(reportId, update);
+                })
                 .addOnFailureListener(e -> Toast.makeText(this, "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
         });
         recycler.setLayoutManager(new LinearLayoutManager(this));
@@ -91,11 +99,17 @@ public class AdminDashboardActivity extends AppCompatActivity {
         tvCountResolved.setText(String.valueOf(resolved));
     }
 
+    private String getAdminName() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.getEmail() != null) return user.getEmail();
+        return "Admin";
+    }
+
     @Override
     public boolean onSupportNavigateUp() { finish(); return true; }
 
     // ---- Inner Adapter ----
-    interface OnStatusChange { void onChange(String reportId, String status); }
+    interface OnStatusChange { void onChange(String reportId, String prevStatus, String newStatus); }
 
     static class AdminAdapter extends RecyclerView.Adapter<AdminAdapter.VH> {
         private List<FaultReport> items;
@@ -122,9 +136,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
             h.tvStatus.setText(r.getStatus().replace("_", " ").toUpperCase());
             h.tvStatus.getBackground().setTint(statusColor(r.getStatus()));
 
-            h.btnOpen.setOnClickListener(v -> listener.onChange(r.getReportId(), "open"));
-            h.btnInProgress.setOnClickListener(v -> listener.onChange(r.getReportId(), "in_progress"));
-            h.btnResolved.setOnClickListener(v -> listener.onChange(r.getReportId(), "resolved"));
+            h.btnOpen.setOnClickListener(v -> listener.onChange(r.getReportId(), r.getStatus(), "open"));
+            h.btnInProgress.setOnClickListener(v -> listener.onChange(r.getReportId(), r.getStatus(), "in_progress"));
+            h.btnResolved.setOnClickListener(v -> listener.onChange(r.getReportId(), r.getStatus(), "resolved"));
         }
 
         @Override public int getItemCount() { return items.size(); }

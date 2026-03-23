@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.cityfix.models.FaultReport;
 import com.cityfix.utils.Constants;
+import com.cityfix.models.StatusUpdate;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -57,6 +58,21 @@ public class ReportRepository {
                     }
                     liveData.postValue(reports);
                 });
+    }
+
+    public Task<DocumentReference> addStatusUpdate(String reportId, StatusUpdate update) {
+        return db.collection(Constants.COLLECTION_REPORTS)
+                .document(reportId)
+                .collection(Constants.COLLECTION_STATUS_HISTORY)
+                .add(update);
+    }
+
+    public Task<QuerySnapshot> getStatusHistory(String reportId) {
+        return db.collection(Constants.COLLECTION_REPORTS)
+                .document(reportId)
+                .collection(Constants.COLLECTION_STATUS_HISTORY)
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .get();
     }
 
     public Task<Void> upvoteReport(String reportId) {

@@ -2,20 +2,29 @@ package com.cityfix.activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.cityfix.R;
+import com.cityfix.models.StatusUpdate;
 import com.cityfix.repositories.ReportRepository;
 import com.google.android.material.button.MaterialButton;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class ReportDetailActivity extends AppCompatActivity {
 
     private ReportRepository reportRepository;
     private String reportId;
     private TextView tvUpvoteCount;
+    private LinearLayout llStatusHistory;
+    private TextView tvHistoryEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +51,8 @@ public class ReportDetailActivity extends AppCompatActivity {
         TextView tvDescription = findViewById(R.id.tv_description);
         TextView tvReporter = findViewById(R.id.tv_reporter);
         tvUpvoteCount = findViewById(R.id.tv_upvote_count);
+        llStatusHistory = findViewById(R.id.ll_status_history);
+        tvHistoryEmpty = findViewById(R.id.tv_history_empty);
         MaterialButton btnUpvote = findViewById(R.id.btn_upvote);
 
         tvTitle.setText(title);
@@ -57,6 +68,7 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         reportRepository = new ReportRepository();
         loadUpvotes();
+        loadStatusHistory();
 
         btnUpvote.setOnClickListener(v -> {
             if (reportId == null) return;
@@ -67,6 +79,32 @@ public class ReportDetailActivity extends AppCompatActivity {
                         btnUpvote.setEnabled(true);
                         Toast.makeText(this, "Failed to upvote", Toast.LENGTH_SHORT).show();
                     });
+        });
+    }
+
+    private void loadStatusHistory() {
+        if (reportId == null) return;
+        reportRepository.getStatusHistory(reportId).addOnSuccessListener(snapshots -> {
+            if (snapshots == null || snapshots.isEmpty()) {
+                tvHistoryEmpty.setVisibility(View.VISIBLE);
+                return;
+            }
+            SimpleDateFormat sdf = new SimpleDateFormat("d MMM HH:mm", Locale.getDefault());
+            for (var doc : snapshots.getDocuments()) {
+                StatusUpdate u = doc.toObject(StatusUpdate.class);
+                if (u == null) continue;
+
+                TextView tv = new TextView(this);
+                String time = u.getTimestamp() != null
+                        ? sdf.format(new Date(u.getTimestamp().toDate().getTime())) : "";
+                String prev = u.getPreviousStatus() != null ? u.getPreviousStatus().replace("_", " ") : "?";
+                String next = u.getNewStatus() != null ? u.getNewStatus().replace("_", " ") : "?";
+                tv.setText("• " + prev + " → " + next + "  (" + time + ")");
+                tv.setTextColor(Color.parseColor("#9E9EB8"));
+                tv.setTextSize(13f);
+                tv.setPadding(0, 4, 0, 4);
+                llStatusHistory.addView(tv);
+            }
         });
     }
 
