@@ -6,14 +6,16 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="@drawable/dark_card_top"
-    android:padding="20dp">
+    android:paddingHorizontal="20dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="24dp">
 
     <!-- Drag handle -->
     <View
         android:layout_width="40dp"
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/drag_handle" />
 
     <TextView
@@ -23,7 +25,7 @@
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
-        android:layout_marginBottom="4dp"/>
+        android:layout_marginBottom="2dp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -31,9 +33,9 @@
         android:text="Help improve your city"
         android:textSize="13sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginBottom="16dp"/>
 
-    <!-- Category -->
+    <!-- Category label -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,7 +50,7 @@
         android:id="@+id/chip_group_category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="16dp"
         app:singleSelection="true">
 
         <com.google.android.material.chip.Chip
@@ -57,7 +59,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🕳 Pothole"
-            android:textColor="@color/text_primary" />
+            android:textColor="#FFFFFF"
+            app:chipBackgroundColor="#2D2D4A"
+            app:chipStrokeColor="#5A5A8A"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconTint="@color/primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_streetlight"
@@ -65,7 +71,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="💡 Streetlight"
-            android:textColor="@color/text_primary" />
+            android:textColor="#FFFFFF"
+            app:chipBackgroundColor="#2D2D4A"
+            app:chipStrokeColor="#5A5A8A"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconTint="@color/primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_flooding"
@@ -73,7 +83,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🌊 Flooding"
-            android:textColor="@color/text_primary" />
+            android:textColor="#FFFFFF"
+            app:chipBackgroundColor="#2D2D4A"
+            app:chipStrokeColor="#5A5A8A"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconTint="@color/primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_vandalism"
@@ -81,7 +95,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🔨 Vandalism"
-            android:textColor="@color/text_primary" />
+            android:textColor="#FFFFFF"
+            app:chipBackgroundColor="#2D2D4A"
+            app:chipStrokeColor="#5A5A8A"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconTint="@color/primary" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_other"
@@ -89,7 +107,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="📌 Other"
-            android:textColor="@color/text_primary" />
+            android:textColor="#FFFFFF"
+            app:chipBackgroundColor="#2D2D4A"
+            app:chipStrokeColor="#5A5A8A"
+            app:chipStrokeWidth="1dp"
+            app:checkedIconTint="@color/primary" />
     </com.google.android.material.chip.ChipGroup>
 
     <!-- Title -->
@@ -98,10 +120,14 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="10dp"
         android:hint="Title"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
         app:boxBackgroundColor="#2D2D4A"
+        app:boxCornerRadiusBottomEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusTopStart="10dp"
         app:boxStrokeColor="#5A5A8A"
         app:hintTextColor="#9E9EB8">
 
@@ -120,10 +146,14 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="10dp"
         android:hint="Description"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
         app:boxBackgroundColor="#2D2D4A"
+        app:boxCornerRadiusBottomEnd="10dp"
+        app:boxCornerRadiusBottomStart="10dp"
+        app:boxCornerRadiusTopEnd="10dp"
+        app:boxCornerRadiusTopStart="10dp"
         app:boxStrokeColor="#5A5A8A"
         app:hintTextColor="#9E9EB8">
 
@@ -145,7 +175,7 @@
         android:gravity="center_vertical"
         android:background="@drawable/dark_card"
         android:padding="12dp"
-        android:layout_marginBottom="20dp">
+        android:layout_marginBottom="12dp">
 
         <TextView
             android:id="@+id/tv_location"
@@ -163,14 +193,15 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:textColor="@color/status_open"
+        android:textSize="13sp"
         android:visibility="gone" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_submit"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginBottom="8dp"
         android:text="Submit Report"
+        android:textColor="#FFFFFF"
         android:textSize="15sp"
         android:textStyle="bold"
         app:backgroundTint="@color/primary"
