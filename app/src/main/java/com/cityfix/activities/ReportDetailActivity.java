@@ -89,6 +89,8 @@ public class ReportDetailActivity extends AppCompatActivity {
             tvCommentsEmpty.setVisibility(comments.isEmpty() ? View.VISIBLE : View.GONE);
         });
 
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+
         reportRepository = new ReportRepository();
         loadUpvotes();
         loadStatusHistory();
