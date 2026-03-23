@@ -100,15 +100,18 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:hint="Title"
-        app:boxStrokeColor="@color/surface_variant"
-        app:hintTextColor="@color/text_secondary">
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
+        app:boxBackgroundColor="#2D2D4A"
+        app:boxStrokeColor="#5A5A8A"
+        app:hintTextColor="#9E9EB8">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:textColor="@color/text_primary" />
+            android:textColor="#FFFFFF"
+            android:textColorHint="#9E9EB8" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Description -->
@@ -119,8 +122,10 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="12dp"
         android:hint="Description"
-        app:boxStrokeColor="@color/surface_variant"
-        app:hintTextColor="@color/text_secondary">
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark"
+        app:boxBackgroundColor="#2D2D4A"
+        app:boxStrokeColor="#5A5A8A"
+        app:hintTextColor="#9E9EB8">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/et_description"
@@ -128,7 +133,8 @@
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
             android:minLines="2"
-            android:textColor="@color/text_primary" />
+            android:textColor="#FFFFFF"
+            android:textColorHint="#9E9EB8" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Location pill -->
