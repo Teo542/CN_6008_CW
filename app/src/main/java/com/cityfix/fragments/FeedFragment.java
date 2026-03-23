@@ -1,5 +1,6 @@
 package com.cityfix.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,16 +9,24 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cityfix.R;
+import com.cityfix.activities.ReportDetailActivity;
+import com.cityfix.adapters.ReportAdapter;
+import com.cityfix.models.FaultReport;
+import com.cityfix.viewmodels.MapViewModel;
+
+import java.util.ArrayList;
 
 public class FeedFragment extends Fragment {
 
     private RecyclerView recyclerReports;
     private SwipeRefreshLayout swipeRefresh;
+    private ReportAdapter adapter;
 
     @Nullable
     @Override
@@ -34,13 +43,28 @@ public class FeedFragment extends Fragment {
         recyclerReports = view.findViewById(R.id.recycler_reports);
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
 
+        adapter = new ReportAdapter(new ArrayList<>(), this::openDetail);
         recyclerReports.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerReports.setAdapter(adapter);
 
-        swipeRefresh.setOnRefreshListener(() -> {
-            // TODO Sprint 3: reload reports from Firestore
+        MapViewModel viewModel = new ViewModelProvider(requireActivity()).get(MapViewModel.class);
+        viewModel.reports.observe(getViewLifecycleOwner(), reports -> {
+            adapter.updateReports(reports);
             swipeRefresh.setRefreshing(false);
         });
 
-        // TODO Sprint 3: set up ReportAdapter and Firestore listener
+        swipeRefresh.setOnRefreshListener(() -> swipeRefresh.setRefreshing(false));
+    }
+
+    private void openDetail(FaultReport report) {
+        Intent intent = new Intent(getActivity(), ReportDetailActivity.class);
+        intent.putExtra("report_id", report.getReportId());
+        intent.putExtra("title", report.getTitle());
+        intent.putExtra("description", report.getDescription());
+        intent.putExtra("category", report.getCategory());
+        intent.putExtra("status", report.getStatus());
+        intent.putExtra("address", report.getAddress());
+        intent.putExtra("userName", report.getUserName());
+        startActivity(intent);
     }
 }
