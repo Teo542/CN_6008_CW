@@ -10,6 +10,7 @@ public class User {
     private String role; // "citizen" or "admin"
     private int reportsSubmitted;
     private Timestamp joinedAt;
+    private String avatarColor;
 
     public User() {} // Required for Firestore deserialization
 
@@ -33,6 +34,7 @@ public class User {
     public String getRole() { return role; }
     public int getReportsSubmitted() { return reportsSubmitted; }
     public Timestamp getJoinedAt() { return joinedAt; }
+    public String getAvatarColor() { return avatarColor; }
 
     // Setters
     public void setUserId(String userId) { this.userId = userId; }

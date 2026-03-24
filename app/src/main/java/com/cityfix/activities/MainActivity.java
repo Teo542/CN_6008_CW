@@ -56,6 +56,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void navigateToMap(double lat, double lng) {
+        bottomNav.setSelectedItemId(R.id.nav_map);
+        MapFragment mapFragment = new MapFragment();
+        android.os.Bundle args = new android.os.Bundle();
+        args.putDouble("focus_lat", lat);
+        args.putDouble("focus_lng", lng);
+        mapFragment.setArguments(args);
+        loadFragment(mapFragment);
+    }
+
     private void setupNavigation() {
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment;

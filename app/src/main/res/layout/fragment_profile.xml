@@ -11,16 +11,35 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- Settings button row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:paddingTop="8dp">
+
+            <ImageButton
+                android:id="@+id/btn_settings"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/dark_card"
+                android:src="@drawable/ic_settings"
+                android:padding="8dp"
+                android:contentDescription="Settings" />
+        </LinearLayout>
+
         <!-- Avatar section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"
-            android:paddingTop="24dp"
+            android:paddingTop="8dp"
             android:paddingBottom="24dp">
 
             <LinearLayout
+                android:id="@+id/avatar_container"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:background="@drawable/circle_orange"
@@ -107,31 +126,6 @@
             android:textSize="13sp"
             android:visibility="gone" />
 
-        <!-- Admin button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_admin_dashboard"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginBottom="10dp"
-            android:text="@string/admin_dashboard"
-            android:textColor="@color/primary"
-            android:visibility="gone"
-            app:strokeColor="@color/primary"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            app:cornerRadius="12dp" />
-
-        <!-- Sign out -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_sign_out"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="@string/sign_out"
-            android:textColor="@color/white"
-            android:textStyle="bold"
-            app:backgroundTint="@color/status_open"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            app:cornerRadius="12dp" />
 
     </LinearLayout>
 </ScrollView>

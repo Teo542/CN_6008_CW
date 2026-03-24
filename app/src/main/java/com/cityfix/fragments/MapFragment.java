@@ -79,7 +79,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         this.googleMap = map;
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.getUiSettings().setZoomControlsEnabled(false);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+
+        android.os.Bundle args = getArguments();
+        if (args != null && args.containsKey("focus_lat")) {
+            LatLng focus = new LatLng(args.getDouble("focus_lat"), args.getDouble("focus_lng"));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(focus, 16f));
+        } else {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
+        }
 
         viewModel.reports.observe(getViewLifecycleOwner(), reports -> {
             allReports = reports;

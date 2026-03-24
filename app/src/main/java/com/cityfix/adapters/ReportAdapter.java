@@ -24,13 +24,22 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         void onReportClick(FaultReport report);
     }
 
+    public interface OnMapClickListener {
+        void onMapClick(FaultReport report);
+    }
+
     private List<FaultReport> reports;
     private final OnReportClickListener listener;
+    private OnMapClickListener mapClickListener;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault());
 
     public ReportAdapter(List<FaultReport> reports, OnReportClickListener listener) {
         this.reports = reports;
         this.listener = listener;
+    }
+
+    public void setOnMapClickListener(OnMapClickListener l) {
+        this.mapClickListener = l;
     }
 
     public void updateReports(List<FaultReport> newReports) {
@@ -51,13 +60,16 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         FaultReport report = reports.get(position);
         holder.bind(report);
         holder.itemView.setOnClickListener(v -> listener.onReportClick(report));
+        if (mapClickListener != null) {
+            holder.btnViewOnMap.setOnClickListener(v -> mapClickListener.onMapClick(report));
+        }
     }
 
     @Override
     public int getItemCount() { return reports == null ? 0 : reports.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCategory, tvStatus, tvTitle, tvAddress, tvReporter, tvTime;
+        TextView tvCategory, tvStatus, tvTitle, tvAddress, tvReporter, tvTime, btnViewOnMap;
         View statusBar;
 
         ViewHolder(View itemView) {
@@ -69,6 +81,7 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
             tvReporter = itemView.findViewById(R.id.tv_reporter);
             tvTime = itemView.findViewById(R.id.tv_time);
             statusBar = itemView.findViewById(R.id.status_bar);
+            btnViewOnMap = itemView.findViewById(R.id.btn_view_on_map);
         }
 
         void bind(FaultReport report) {
@@ -84,8 +97,12 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
                 tvTime.setText(new SimpleDateFormat("dd MMM, HH:mm", Locale.getDefault()).format(date));
             }
 
-            tvStatus.getBackground().setTint(statusColor(report.getStatus()));
-            tvCategory.getBackground().setTint(categoryColor(report.getCategory()));
+            // Status badge: dark background, colored text (mutate to avoid shared drawable bleed)
+            tvStatus.getBackground().mutate().setTint(Color.parseColor("#1E1E2E"));
+            tvStatus.setTextColor(statusColor(report.getStatus()));
+            // Category badge: colored background, white text
+            tvCategory.getBackground().mutate().setTint(categoryColor(report.getCategory()));
+            tvCategory.setTextColor(Color.WHITE);
         }
 
         private int statusColor(String status) {

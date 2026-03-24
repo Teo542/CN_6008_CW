@@ -52,6 +52,9 @@ public class FeedFragment extends Fragment {
         layoutEmpty = view.findViewById(R.id.layout_empty);
 
         adapter = new ReportAdapter(new ArrayList<>(), this::openDetail);
+        adapter.setOnMapClickListener(report ->
+                ((com.cityfix.activities.MainActivity) requireActivity())
+                        .navigateToMap(report.getLatitude(), report.getLongitude()));
         recyclerReports.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerReports.setAdapter(adapter);
 

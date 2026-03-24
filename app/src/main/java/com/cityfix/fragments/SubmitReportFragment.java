@@ -77,6 +77,12 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
         setupCategoryChips();
         requestLocationAndDetect();
         btnSubmit.setOnClickListener(v -> submitReport());
+
+        view.findViewById(R.id.row_location).setOnClickListener(v -> {
+            android.widget.Toast.makeText(requireContext(),
+                    "Pan the map to your location, then tap +", android.widget.Toast.LENGTH_SHORT).show();
+            dismiss();
+        });
     }
 
     private void setupCategoryChips() {

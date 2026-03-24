@@ -36,6 +36,18 @@ public class UserRepository {
                         com.google.firebase.firestore.FieldValue.increment(1));
     }
 
+    public Task<Void> updateDisplayName(String userId, String name) {
+        return db.collection(Constants.COLLECTION_USERS)
+                .document(userId)
+                .update("displayName", name);
+    }
+
+    public Task<Void> updateAvatarColor(String userId, String colorHex) {
+        return db.collection(Constants.COLLECTION_USERS)
+                .document(userId)
+                .update("avatarColor", colorHex);
+    }
+
     public String getCurrentUserId() {
         return auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
     }

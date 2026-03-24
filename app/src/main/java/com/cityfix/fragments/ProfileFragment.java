@@ -1,10 +1,13 @@
 package com.cityfix.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,17 +18,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cityfix.R;
-import com.cityfix.activities.AdminDashboardActivity;
-import com.cityfix.activities.AuthActivity;
 import com.cityfix.activities.ReportDetailActivity;
 import com.cityfix.adapters.ReportAdapter;
 import com.cityfix.models.FaultReport;
 import com.cityfix.models.User;
 import com.cityfix.repositories.ReportRepository;
 import com.cityfix.repositories.UserRepository;
-import com.cityfix.utils.Constants;
-import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,7 @@ public class ProfileFragment extends Fragment {
     private MutableLiveData<List<FaultReport>> myReportsLiveData = new MutableLiveData<>();
 
     private TextView tvAvatar, tvDisplayName, tvEmail, tvReportsCount, tvMyReportsEmpty;
-    private MaterialButton btnAdminDashboard, btnSignOut;
+    private LinearLayout avatarContainer;
 
     @Nullable
     @Override
@@ -59,15 +57,17 @@ public class ProfileFragment extends Fragment {
         tvDisplayName = view.findViewById(R.id.tv_display_name);
         tvEmail = view.findViewById(R.id.tv_email);
         tvReportsCount = view.findViewById(R.id.tv_reports_count);
-        btnAdminDashboard = view.findViewById(R.id.btn_admin_dashboard);
-        btnSignOut = view.findViewById(R.id.btn_sign_out);
+        tvMyReportsEmpty = view.findViewById(R.id.tv_my_reports_empty);
+        avatarContainer = view.findViewById(R.id.avatar_container);
+
+        ImageButton btnSettings = view.findViewById(R.id.btn_settings);
+        btnSettings.setOnClickListener(v ->
+                new SettingsFragment().show(getChildFragmentManager(), "settings"));
 
         RecyclerView recyclerMyReports = view.findViewById(R.id.recycler_my_reports);
         myReportsAdapter = new ReportAdapter(new ArrayList<>(), this::openDetail);
         recyclerMyReports.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerMyReports.setAdapter(myReportsAdapter);
-
-        tvMyReportsEmpty = view.findViewById(R.id.tv_my_reports_empty);
 
         myReportsLiveData.observe(getViewLifecycleOwner(), reports -> {
             myReportsAdapter.updateReports(reports);
@@ -75,7 +75,6 @@ public class ProfileFragment extends Fragment {
         });
 
         loadUserProfile();
-        setupButtons();
     }
 
     private void loadUserProfile() {
@@ -102,21 +101,15 @@ public class ProfileFragment extends Fragment {
             tvAvatar.setText(String.valueOf(name.charAt(0)).toUpperCase());
         }
 
-        if (Constants.ROLE_ADMIN.equals(user.getRole())) {
-            btnAdminDashboard.setVisibility(View.VISIBLE);
+        // Apply saved avatar color if present
+        if (avatarContainer != null) {
+            String colorHex = user.getAvatarColor();
+            if (colorHex != null && !colorHex.isEmpty()) {
+                try {
+                    avatarContainer.getBackground().mutate().setTint(Color.parseColor(colorHex));
+                } catch (Exception ignored) {}
+            }
         }
-    }
-
-    private void setupButtons() {
-        btnAdminDashboard.setOnClickListener(v ->
-                startActivity(new Intent(getContext(), AdminDashboardActivity.class)));
-
-        btnSignOut.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(getContext(), AuthActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
     }
 
     private void openDetail(FaultReport report) {
