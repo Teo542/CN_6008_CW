@@ -1,5 +1,7 @@
 package com.cityfix.repositories;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.cityfix.models.User;
 import com.cityfix.utils.Constants;
 import com.google.android.gms.tasks.Task;
@@ -27,6 +29,16 @@ public class UserRepository {
         return db.collection(Constants.COLLECTION_USERS)
                 .document(userId)
                 .get();
+    }
+
+    public void listenToUser(String userId, MutableLiveData<User> liveData) {
+        db.collection(Constants.COLLECTION_USERS)
+                .document(userId)
+                .addSnapshotListener((snapshot, error) -> {
+                    if (error != null || snapshot == null) return;
+                    User user = snapshot.toObject(User.class);
+                    liveData.postValue(user);
+                });
     }
 
     public Task<Void> incrementReportsSubmitted(String userId) {

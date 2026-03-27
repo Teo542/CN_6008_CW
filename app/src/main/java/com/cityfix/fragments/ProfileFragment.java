@@ -34,6 +34,7 @@ public class ProfileFragment extends Fragment {
     private ReportRepository reportRepository;
     private ReportAdapter myReportsAdapter;
     private MutableLiveData<List<FaultReport>> myReportsLiveData = new MutableLiveData<>();
+    private MutableLiveData<User> userLiveData = new MutableLiveData<>();
 
     private TextView tvAvatar, tvDisplayName, tvEmail, tvReportsCount, tvMyReportsEmpty;
     private LinearLayout avatarContainer;
@@ -74,20 +75,17 @@ public class ProfileFragment extends Fragment {
             tvMyReportsEmpty.setVisibility(reports.isEmpty() ? View.VISIBLE : View.GONE);
         });
 
+        userLiveData.observe(getViewLifecycleOwner(), user -> {
+            if (user != null) populateUI(user);
+        });
+
         loadUserProfile();
     }
 
     private void loadUserProfile() {
         String uid = userRepository.getCurrentUserId();
         if (uid == null) return;
-
-        userRepository.getUser(uid).addOnSuccessListener(snapshot -> {
-            if (!isAdded() || snapshot == null) return;
-            User user = snapshot.toObject(User.class);
-            if (user == null) return;
-            populateUI(user);
-        });
-
+        userRepository.listenToUser(uid, userLiveData);
         reportRepository.listenToUserReports(uid, myReportsLiveData);
     }
 
