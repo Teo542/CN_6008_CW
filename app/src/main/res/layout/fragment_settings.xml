@@ -91,35 +91,6 @@
             android:textSize="20sp" />
     </LinearLayout>
 
-    <!-- Admin Dashboard (hidden by default, shown if admin) -->
-    <LinearLayout
-        android:id="@+id/row_admin"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="20dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:visibility="gone">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="🛡️  Admin Dashboard"
-            android:textColor="@color/primary"
-            android:textSize="15sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="›"
-            android:textColor="@color/text_hint"
-            android:textSize="20sp" />
-    </LinearLayout>
-
     <!-- Divider -->
     <View
         android:layout_width="match_parent"

@@ -13,11 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.cityfix.R;
-import com.cityfix.activities.AdminDashboardActivity;
 import com.cityfix.activities.AuthActivity;
 import com.cityfix.models.User;
 import com.cityfix.repositories.UserRepository;
-import com.cityfix.utils.Constants;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
@@ -61,7 +59,6 @@ public class SettingsFragment extends BottomSheetDialogFragment {
 
         LinearLayout rowChangeName = view.findViewById(R.id.row_change_name);
         LinearLayout rowChangeAvatar = view.findViewById(R.id.row_change_avatar);
-        LinearLayout rowAdmin = view.findViewById(R.id.row_admin);
         LinearLayout rowSignOut = view.findViewById(R.id.row_sign_out);
 
         String uid = userRepository.getCurrentUserId();
@@ -69,20 +66,12 @@ public class SettingsFragment extends BottomSheetDialogFragment {
             userRepository.getUser(uid).addOnSuccessListener(snapshot -> {
                 if (!isAdded() || snapshot == null) return;
                 currentUser = snapshot.toObject(User.class);
-                if (currentUser != null && Constants.ROLE_ADMIN.equals(currentUser.getRole())) {
-                    rowAdmin.setVisibility(View.VISIBLE);
-                }
             });
         }
 
         rowChangeName.setOnClickListener(v -> showChangeNameDialog());
 
         rowChangeAvatar.setOnClickListener(v -> showAvatarColorPicker());
-
-        rowAdmin.setOnClickListener(v -> {
-            dismiss();
-            startActivity(new Intent(requireContext(), AdminDashboardActivity.class));
-        });
 
         rowSignOut.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();

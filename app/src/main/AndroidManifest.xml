@@ -30,7 +30,6 @@
 
         <activity android:name=".activities.MainActivity" />
         <activity android:name=".activities.ReportDetailActivity" />
-        <activity android:name=".activities.AdminDashboardActivity" />
 
 
 <service
