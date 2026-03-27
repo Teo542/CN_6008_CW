@@ -128,9 +128,9 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
 
     private void launchCamera() {
         try {
-            File imageFile = File.createTempFile("report_", ".jpg",
-                    new File(requireContext().getCacheDir(), "images"));
-            imageFile.getParentFile().mkdirs();
+            File imagesDir = new File(requireContext().getCacheDir(), "images");
+            imagesDir.mkdirs();
+            File imageFile = File.createTempFile("report_", ".jpg", imagesDir);
             photoUri = FileProvider.getUriForFile(requireContext(),
                     requireContext().getPackageName() + ".fileprovider", imageFile);
             takePictureLauncher.launch(photoUri);
