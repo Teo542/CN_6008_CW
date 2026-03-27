@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityFix Admin — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">CityFix</div>
+      <div class="role-badge">Admin Portal</div>
+      <a href="dashboard.html" class="nav-link active">📋 Reports</a>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-user">
+        <span id="adminEmail"></span>
+        <button class="signout" id="signoutBtn">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <div class="page-title">Reports</div>
+      <div class="page-subtitle">Manage and update all city fault reports</div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card open">
+          <div class="number" id="stat-open">—</div>
+          <div class="label">Open</div>
+        </div>
+        <div class="stat-card progress">
+          <div class="number" id="stat-progress">—</div>
+          <div class="label">In Progress</div>
+        </div>
+        <div class="stat-card resolved">
+          <div class="number" id="stat-resolved">—</div>
+          <div class="label">Resolved</div>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <input class="search-input" id="searchInput" placeholder="Search by title or address…" />
+        <select class="filter-select" id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="open">Open</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+        </select>
+        <select class="filter-select" id="categoryFilter">
+          <option value="">All Categories</option>
+          <option value="pothole">Pothole</option>
+          <option value="streetlight">Streetlight</option>
+          <option value="flooding">Flooding</option>
+          <option value="vandalism">Vandalism</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Address</th>
+              <th>By</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Change Status</th>
+            </tr>
+          </thead>
+          <tbody id="reportsBody">
+            <tr><td colspan="7" class="spinner">Loading reports…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { doc, getDoc, collection, onSnapshot, updateDoc, query, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    let allReports = [];
+    let adminEmail = "";
+
+    // Auth guard
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists() || snap.data().role !== "admin") {
+        await signOut(auth);
+        window.location.href = "index.html";
+        return;
+      }
+      adminEmail = user.email;
+      document.getElementById("adminEmail").textContent = adminEmail;
+      startListening();
+    });
+
+    document.getElementById("signoutBtn").addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "index.html";
+    });
+
+    function startListening() {
+      const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
+      onSnapshot(q, (snapshot) => {
+        allReports = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        updateStats(allReports);
+        renderTable(filtered());
+      });
+    }
+
+    function filtered() {
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      const status = document.getElementById("statusFilter").value;
+      const category = document.getElementById("categoryFilter").value;
+      return allReports.filter(r => {
+        const matchSearch = !search ||
+          (r.title || "").toLowerCase().includes(search) ||
+          (r.address || "").toLowerCase().includes(search);
+        const matchStatus = !status || r.status === status;
+        const matchCat = !category || r.category === category;
+        return matchSearch && matchStatus && matchCat;
+      });
+    }
+
+    ["searchInput", "statusFilter", "categoryFilter"].forEach(id => {
+      document.getElementById(id).addEventListener("input", () => renderTable(filtered()));
+    });
+
+    function updateStats(reports) {
+      const counts = { open: 0, in_progress: 0, resolved: 0 };
+      reports.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+      document.getElementById("stat-open").textContent = counts.open;
+      document.getElementById("stat-progress").textContent = counts.in_progress;
+      document.getElementById("stat-resolved").textContent = counts.resolved;
+    }
+
+    function renderTable(reports) {
+      const tbody = document.getElementById("reportsBody");
+      if (reports.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No reports found</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = reports.map(r => {
+        const date = r.timestamp?.toDate
+          ? r.timestamp.toDate().toLocaleDateString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+          : "—";
+        const badgeClass = r.status === "open" ? "badge-open" : r.status === "in_progress" ? "badge-progress" : "badge-resolved";
+        const badgeText = r.status === "in_progress" ? "In Progress" : r.status.charAt(0).toUpperCase() + r.status.slice(1);
+        return `
+          <tr onclick="window.location='report.html?id=${r.id}'" data-id="${r.id}">
+            <td><strong>${escHtml(r.title || "—")}</strong></td>
+            <td>${capitalize(r.category || "—")}</td>
+            <td style="color:var(--muted);font-size:13px">${escHtml(r.address || "—")}</td>
+            <td style="color:var(--muted);font-size:13px">${escHtml(r.userName || "—")}</td>
+            <td style="color:var(--muted);font-size:13px">${date}</td>
+            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+            <td onclick="event.stopPropagation()">
+              <select class="status-select" onchange="changeStatus('${r.id}', '${r.status}', this.value)">
+                <option value="open" ${r.status === "open" ? "selected" : ""}>Open</option>
+                <option value="in_progress" ${r.status === "in_progress" ? "selected" : ""}>In Progress</option>
+                <option value="resolved" ${r.status === "resolved" ? "selected" : ""}>Resolved</option>
+              </select>
+            </td>
+          </tr>`;
+      }).join("");
+    }
+
+    window.changeStatus = async (reportId, prevStatus, newStatus) => {
+      if (prevStatus === newStatus) return;
+      try {
+        await updateDoc(doc(db, "reports", reportId), { status: newStatus });
+        await addDoc(collection(db, "reports", reportId, "statusHistory"), {
+          fromStatus: prevStatus,
+          toStatus: newStatus,
+          changedBy: adminEmail,
+          timestamp: serverTimestamp()
+        });
+        showToast(`Status updated to ${newStatus.replace("_", " ")}`);
+      } catch (e) {
+        showToast("Failed to update status");
+      }
+    };
+
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    function escHtml(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+    function showToast(msg) {
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  </script>
+</body>
+</html>

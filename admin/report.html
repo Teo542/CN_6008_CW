@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityFix Admin — Report Detail</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">CityFix</div>
+      <div class="role-badge">Admin Portal</div>
+      <a href="dashboard.html" class="nav-link active">📋 Reports</a>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-user">
+        <span id="adminEmail"></span>
+        <button class="signout" id="signoutBtn">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <a href="dashboard.html" class="back-btn">← Back to Reports</a>
+      <div id="content" class="spinner">Loading…</div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import {
+      doc, getDoc, updateDoc, onSnapshot,
+      collection, query, orderBy, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const reportId = new URLSearchParams(location.search).get("id");
+    let adminEmail = "";
+    let currentStatus = "";
+
+    // Auth guard
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = "index.html"; return; }
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists() || snap.data().role !== "admin") {
+        await signOut(auth); window.location.href = "index.html"; return;
+      }
+      adminEmail = user.email;
+      document.getElementById("adminEmail").textContent = adminEmail;
+      if (!reportId) { document.getElementById("content").textContent = "No report ID provided."; return; }
+      loadReport();
+    });
+
+    document.getElementById("signoutBtn").addEventListener("click", async () => {
+      await signOut(auth); window.location.href = "index.html";
+    });
+
+    function loadReport() {
+      onSnapshot(doc(db, "reports", reportId), (snap) => {
+        if (!snap.exists()) { document.getElementById("content").textContent = "Report not found."; return; }
+        const r = { id: snap.id, ...snap.data() };
+        currentStatus = r.status;
+        renderDetail(r);
+      });
+
+      // Status history
+      const histQ = query(collection(db, "reports", reportId, "statusHistory"), orderBy("timestamp", "asc"));
+      onSnapshot(histQ, (snap) => {
+        renderHistory(snap.docs.map(d => d.data()));
+      });
+
+      // Comments
+      const commQ = query(collection(db, "reports", reportId, "comments"), orderBy("timestamp", "asc"));
+      onSnapshot(commQ, (snap) => {
+        renderComments(snap.docs.map(d => d.data()));
+      });
+    }
+
+    function renderDetail(r) {
+      const date = r.timestamp?.toDate
+        ? r.timestamp.toDate().toLocaleString("en-GB")
+        : "—";
+      const badgeClass = r.status === "open" ? "badge-open" : r.status === "in_progress" ? "badge-progress" : "badge-resolved";
+      const badgeText = r.status === "in_progress" ? "In Progress" : capitalize(r.status);
+
+      document.getElementById("content").innerHTML = `
+        <div class="page-title">${escHtml(r.title || "Untitled")}</div>
+        <div class="page-subtitle" style="margin-bottom:20px">
+          <span class="badge ${badgeClass}" id="statusBadge">${badgeText}</span>
+        </div>
+
+        <div class="detail-grid">
+          <!-- Left column -->
+          <div>
+            <!-- Info -->
+            <div class="card">
+              <h3>Report Info</h3>
+              <div class="info-row"><span class="key">Category</span><span>${capitalize(r.category || "—")}</span></div>
+              <div class="info-row"><span class="key">Submitted by</span><span>${escHtml(r.userName || "—")}</span></div>
+              <div class="info-row"><span class="key">Address</span><span>${escHtml(r.address || "—")}</span></div>
+              <div class="info-row"><span class="key">Date</span><span>${date}</span></div>
+              <div class="info-row"><span class="key">Upvotes</span><span>${r.upvotes || 0}</span></div>
+              ${r.description ? `<div class="info-row" style="flex-direction:column;gap:6px"><span class="key">Description</span><span>${escHtml(r.description)}</span></div>` : ""}
+            </div>
+
+            <!-- Comments -->
+            <div class="card">
+              <h3>Comments</h3>
+              <div id="commentsList"><div class="empty-state">No comments yet</div></div>
+              <div class="comment-input-row">
+                <input type="text" id="commentInput" placeholder="Add an admin comment…" />
+                <button onclick="postComment()">Send</button>
+              </div>
+            </div>
+
+            <!-- Status History -->
+            <div class="card">
+              <h3>Status History</h3>
+              <div id="historyList"><div class="empty-state">No history yet</div></div>
+            </div>
+          </div>
+
+          <!-- Right column -->
+          <div>
+            <div class="card">
+              <h3>Change Status</h3>
+              <div class="status-btn-group">
+                <button class="status-btn open-btn ${r.status === 'open' ? 'active' : ''}"
+                  onclick="setStatus('open')">🔴 Open</button>
+                <button class="status-btn progress-btn ${r.status === 'in_progress' ? 'active' : ''}"
+                  onclick="setStatus('in_progress')">🟠 In Progress</button>
+                <button class="status-btn resolved-btn ${r.status === 'resolved' ? 'active' : ''}"
+                  onclick="setStatus('resolved')">🟢 Resolved</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>Location</h3>
+              <div class="info-row"><span class="key">Lat</span><span>${r.latitude?.toFixed(5) || "—"}</span></div>
+              <div class="info-row"><span class="key">Lng</span><span>${r.longitude?.toFixed(5) || "—"}</span></div>
+              ${r.latitude && r.longitude ? `
+                <a href="https://maps.google.com/?q=${r.latitude},${r.longitude}" target="_blank"
+                  style="display:block;margin-top:12px;text-align:center;color:var(--accent);font-size:14px;text-decoration:none;">
+                  📍 Open in Google Maps
+                </a>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHistory(history) {
+      const el = document.getElementById("historyList");
+      if (!el) return;
+      if (history.length === 0) { el.innerHTML = `<div class="empty-state">No history yet</div>`; return; }
+      el.innerHTML = history.map(h => {
+        const color = h.toStatus === "open" ? "var(--open)" : h.toStatus === "in_progress" ? "var(--progress)" : "var(--resolved)";
+        const date = h.timestamp?.toDate ? h.timestamp.toDate().toLocaleString("en-GB") : "—";
+        return `<div class="timeline-item">
+          <div class="timeline-dot" style="background:${color}"></div>
+          <div class="timeline-content">
+            <div>${capitalize(h.fromStatus?.replace("_"," ") || "—")} → <strong>${capitalize(h.toStatus?.replace("_"," ") || "—")}</strong></div>
+            <div class="who">${escHtml(h.changedBy || "Unknown")} · ${date}</div>
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    function renderComments(comments) {
+      const el = document.getElementById("commentsList");
+      if (!el) return;
+      if (comments.length === 0) { el.innerHTML = `<div class="empty-state">No comments yet</div>`; return; }
+      el.innerHTML = comments.map(c => {
+        const date = c.timestamp?.toDate ? c.timestamp.toDate().toLocaleString("en-GB") : "—";
+        return `<div class="comment-item">
+          <div class="author">${escHtml(c.userName || "User")}</div>
+          <div>${escHtml(c.text || "")}</div>
+          <div class="time">${date}</div>
+        </div>`;
+      }).join("");
+    }
+
+    window.setStatus = async (newStatus) => {
+      if (newStatus === currentStatus) return;
+      const prev = currentStatus;
+      try {
+        await updateDoc(doc(db, "reports", reportId), { status: newStatus });
+        await addDoc(collection(db, "reports", reportId, "statusHistory"), {
+          fromStatus: prev,
+          toStatus: newStatus,
+          changedBy: adminEmail,
+          timestamp: serverTimestamp()
+        });
+        showToast(`Status → ${newStatus.replace("_", " ")}`);
+      } catch (e) {
+        showToast("Failed to update");
+      }
+    };
+
+    window.postComment = async () => {
+      const input = document.getElementById("commentInput");
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      try {
+        await addDoc(collection(db, "reports", reportId, "comments"), {
+          text,
+          userName: adminEmail,
+          timestamp: serverTimestamp()
+        });
+        showToast("Comment posted");
+      } catch (e) {
+        showToast("Failed to post comment");
+      }
+    };
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && document.activeElement?.id === "commentInput") {
+        window.postComment();
+      }
+    });
+
+    function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : "—"; }
+    function escHtml(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+    function showToast(msg) {
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+  </script>
+</body>
+</html>

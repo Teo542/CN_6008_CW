@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CityFix Admin — Login</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="logo">CityFix</div>
+      <div class="subtitle">Admin Portal</div>
+
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="admin@example.com" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" />
+      </div>
+
+      <button class="btn" id="loginBtn">Sign In</button>
+      <div class="error-msg" id="errorMsg"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase.js";
+    import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    // Already logged in?
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists() && snap.data().role === "admin") {
+          window.location.href = "dashboard.html";
+        }
+      }
+    });
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const errorMsg = document.getElementById("errorMsg");
+      const btn = document.getElementById("loginBtn");
+
+      errorMsg.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Signing in…";
+
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const snap = await getDoc(doc(db, "users", cred.user.uid));
+
+        if (!snap.exists() || snap.data().role !== "admin") {
+          await auth.signOut();
+          errorMsg.textContent = "Access denied. Admin accounts only.";
+          btn.disabled = false;
+          btn.textContent = "Sign In";
+          return;
+        }
+
+        window.location.href = "dashboard.html";
+      } catch (e) {
+        errorMsg.textContent = "Invalid email or password.";
+        btn.disabled = false;
+        btn.textContent = "Sign In";
+      }
+    });
+
+    // Enter key
+    document.getElementById("password").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("loginBtn").click();
+    });
+  </script>
+</body>
+</html>
