@@ -23,12 +23,15 @@
 
       <button class="btn" id="loginBtn">Sign In</button>
       <div class="error-msg" id="errorMsg"></div>
+      <div style="text-align:center;margin-top:14px">
+        <a href="#" id="resetBtn" style="color:var(--muted);font-size:13px;text-decoration:none;">Forgot password?</a>
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { auth, db } from "./firebase.js";
-    import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
     import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // Already logged in?
@@ -52,22 +55,27 @@
       btn.textContent = "Signing in…";
 
       try {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        const snap = await getDoc(doc(db, "users", cred.user.uid));
-
-        if (!snap.exists() || snap.data().role !== "admin") {
-          await auth.signOut();
-          errorMsg.textContent = "Access denied. Admin accounts only.";
-          btn.disabled = false;
-          btn.textContent = "Sign In";
-          return;
-        }
-
+        await signInWithEmailAndPassword(auth, email, password);
         window.location.href = "dashboard.html";
       } catch (e) {
         errorMsg.textContent = "Invalid email or password.";
         btn.disabled = false;
         btn.textContent = "Sign In";
+      }
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const errorMsg = document.getElementById("errorMsg");
+      if (!email) { errorMsg.style.color = "var(--progress)"; errorMsg.textContent = "Enter your email first."; return; }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        errorMsg.style.color = "var(--resolved)";
+        errorMsg.textContent = "Reset email sent! Check your inbox.";
+      } catch (e) {
+        errorMsg.style.color = "var(--open)";
+        errorMsg.textContent = "Could not send reset email.";
       }
     });
 
