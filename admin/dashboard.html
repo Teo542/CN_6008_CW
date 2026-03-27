@@ -5,43 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CityFix Admin — Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .nav-section { font-size:11px; color:var(--border); text-transform:uppercase; letter-spacing:1px; padding:8px 8px 4px; margin-top:8px; }
+    .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px; }
+    .kpi-grid.wide { grid-template-columns:repeat(6,1fr); }
+    .kpi { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 16px; }
+    .kpi .val { font-size:28px; font-weight:700; margin-bottom:2px; }
+    .kpi .lbl { font-size:12px; color:var(--muted); }
+    .kpi .delta { font-size:12px; margin-top:4px; }
+    .kpi.total .val { color:var(--text); }
+    .kpi.open .val { color:var(--open); }
+    .kpi.prog .val { color:var(--progress); }
+    .kpi.res .val { color:var(--resolved); }
+    .kpi.rate .val { color:#7C3AED; }
+    .kpi.week .val { color:#06B6D4; }
+    .charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+    .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+    .chart-card h3 { font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:16px; }
+    .chart-wrap { position:relative; height:220px; }
+    .bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+    .panel { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; }
+    .panel h3 { font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:14px; }
+    .panel-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); font-size:14px; }
+    .panel-row:last-child { border-bottom:none; }
+    .panel-row .sub { color:var(--muted); font-size:12px; margin-top:2px; }
+    .cat-bar-wrap { margin-bottom:10px; }
+    .cat-bar-label { display:flex; justify-content:space-between; font-size:13px; margin-bottom:4px; }
+    .cat-bar-track { height:6px; background:var(--card); border-radius:3px; overflow:hidden; }
+    .cat-bar-fill { height:100%; border-radius:3px; transition:width .5s; }
+    .page { display:none; }
+    .page.active { display:block; }
+    .trend-up { color:var(--resolved); }
+    .trend-down { color:var(--open); }
+  </style>
 </head>
 <body>
-  <div class="app-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="logo">CityFix</div>
-      <div class="role-badge">Admin Portal</div>
-      <a href="dashboard.html" class="nav-link active">📋 Reports</a>
-      <div class="sidebar-spacer"></div>
-      <div class="sidebar-user">
-        <span id="adminEmail"></span>
-        <button class="signout" id="signoutBtn">Sign out</button>
-      </div>
-    </aside>
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">CityFix</div>
+    <div class="role-badge">Admin Portal</div>
+    <div class="nav-section">Menu</div>
+    <a href="#" class="nav-link active" id="nav-overview" onclick="showPage('overview',this)">📊 Overview</a>
+    <a href="#" class="nav-link" id="nav-reports" onclick="showPage('reports',this)">📋 Reports</a>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-user">
+      <span id="adminEmail"></span>
+      <button class="signout" id="signoutBtn">Sign out</button>
+    </div>
+  </aside>
 
-    <!-- Main -->
-    <main class="main">
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ===== OVERVIEW PAGE ===== -->
+    <div class="page active" id="page-overview">
+      <div class="page-title">Overview</div>
+      <div class="page-subtitle" id="last-updated">Loading…</div>
+
+      <!-- KPI Row -->
+      <div class="kpi-grid wide">
+        <div class="kpi total"><div class="val" id="k-total">—</div><div class="lbl">Total Reports</div></div>
+        <div class="kpi open"><div class="val" id="k-open">—</div><div class="lbl">Open</div></div>
+        <div class="kpi prog"><div class="val" id="k-prog">—</div><div class="lbl">In Progress</div></div>
+        <div class="kpi res"><div class="val" id="k-res">—</div><div class="lbl">Resolved</div></div>
+        <div class="kpi rate"><div class="val" id="k-rate">—</div><div class="lbl">Resolution Rate</div></div>
+        <div class="kpi week"><div class="val" id="k-week">—</div><div class="lbl">This Week</div></div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>Reports Last 7 Days</h3>
+          <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Status Distribution</h3>
+          <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="bottom-grid">
+        <!-- Category Breakdown -->
+        <div class="panel">
+          <h3>By Category</h3>
+          <div id="catBars"></div>
+        </div>
+
+        <!-- Top Upvoted -->
+        <div class="panel">
+          <h3>Most Upvoted Reports</h3>
+          <div id="topUpvoted"><div class="empty-state">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- Second Bottom Row -->
+      <div class="bottom-grid">
+        <!-- Top Reporters -->
+        <div class="panel">
+          <h3>Most Active Citizens</h3>
+          <div id="topReporters"><div class="empty-state">Loading…</div></div>
+        </div>
+
+        <!-- Today's Summary -->
+        <div class="panel">
+          <h3>Today's Activity</h3>
+          <div id="todaySummary"><div class="empty-state">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== REPORTS PAGE ===== -->
+    <div class="page" id="page-reports">
       <div class="page-title">Reports</div>
       <div class="page-subtitle">Manage and update all city fault reports</div>
 
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card open">
-          <div class="number" id="stat-open">—</div>
-          <div class="label">Open</div>
-        </div>
-        <div class="stat-card progress">
-          <div class="number" id="stat-progress">—</div>
-          <div class="label">In Progress</div>
-        </div>
-        <div class="stat-card resolved">
-          <div class="number" id="stat-resolved">—</div>
-          <div class="label">Resolved</div>
-        </div>
-      </div>
-
-      <!-- Toolbar -->
       <div class="toolbar">
         <input class="search-input" id="searchInput" placeholder="Search by title or address…" />
         <select class="filter-select" id="statusFilter">
@@ -60,148 +140,279 @@
         </select>
       </div>
 
-      <!-- Table -->
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Address</th>
-              <th>By</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Change Status</th>
+              <th>Title</th><th>Category</th><th>Address</th>
+              <th>By</th><th>Date</th><th>Upvotes</th><th>Status</th><th>Change Status</th>
             </tr>
           </thead>
           <tbody id="reportsBody">
-            <tr><td colspan="7" class="spinner">Loading reports…</td></tr>
+            <tr><td colspan="8" class="spinner">Loading reports…</td></tr>
           </tbody>
         </table>
       </div>
-    </main>
-  </div>
+    </div>
 
-  <script type="module">
-    import { auth, db } from "./firebase.js";
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { doc, getDoc, collection, onSnapshot, updateDoc, query, orderBy, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  </main>
+</div>
 
-    let allReports = [];
-    let adminEmail = "";
+<script type="module">
+  import { auth, db } from "./firebase.js";
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, getDoc, collection, onSnapshot, updateDoc, query, orderBy, addDoc, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // Auth guard
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) { window.location.href = "index.html"; return; }
-      const snap = await getDoc(doc(db, "users", user.uid));
-      if (!snap.exists() || snap.data().role !== "admin") {
-        await signOut(auth);
-        window.location.href = "index.html";
-        return;
+  let allReports = [];
+  let adminEmail = "";
+  let trendChart, statusChart;
+
+  // Auth guard
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "index.html"; return; }
+    const snap = await getDoc(doc(db, "users", user.uid));
+    if (!snap.exists() || snap.data().role !== "admin") {
+      await signOut(auth); window.location.href = "index.html"; return;
+    }
+    adminEmail = user.email;
+    document.getElementById("adminEmail").textContent = adminEmail;
+    startListening();
+  });
+
+  document.getElementById("signoutBtn").addEventListener("click", async () => {
+    await signOut(auth); window.location.href = "index.html";
+  });
+
+  ["searchInput","statusFilter","categoryFilter"].forEach(id => {
+    document.getElementById(id)?.addEventListener("input", () => renderTable(filtered()));
+  });
+
+  function startListening() {
+    const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
+    onSnapshot(q, (snapshot) => {
+      allReports = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      updateOverview(allReports);
+      renderTable(filtered());
+      document.getElementById("last-updated").textContent =
+        "Last updated: " + new Date().toLocaleTimeString("en-GB");
+    });
+  }
+
+  // ---- Overview ----
+  function updateOverview(reports) {
+    const total = reports.length;
+    const open = reports.filter(r => r.status === "open").length;
+    const prog = reports.filter(r => r.status === "in_progress").length;
+    const res  = reports.filter(r => r.status === "resolved").length;
+    const rate = total > 0 ? Math.round((res / total) * 100) : 0;
+
+    const now = new Date();
+    const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    const thisWeek = reports.filter(r => r.timestamp?.toDate && r.timestamp.toDate() >= weekAgo).length;
+
+    document.getElementById("k-total").textContent = total;
+    document.getElementById("k-open").textContent  = open;
+    document.getElementById("k-prog").textContent  = prog;
+    document.getElementById("k-res").textContent   = res;
+    document.getElementById("k-rate").textContent  = rate + "%";
+    document.getElementById("k-week").textContent  = thisWeek;
+
+    renderTrendChart(reports);
+    renderStatusChart(open, prog, res);
+    renderCategoryBars(reports, total);
+    renderTopUpvoted(reports);
+    renderTopReporters(reports);
+    renderTodaySummary(reports);
+  }
+
+  function renderTrendChart(reports) {
+    const days = [];
+    const counts = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const label = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric" });
+      days.push(label);
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const dayEnd   = new Date(dayStart.getTime() + 86400000);
+      counts.push(reports.filter(r => {
+        if (!r.timestamp?.toDate) return false;
+        const t = r.timestamp.toDate();
+        return t >= dayStart && t < dayEnd;
+      }).length);
+    }
+
+    if (trendChart) trendChart.destroy();
+    trendChart = new Chart(document.getElementById("chartTrend"), {
+      type: "bar",
+      data: {
+        labels: days,
+        datasets: [{ label: "Reports", data: counts, backgroundColor: "#E8622A", borderRadius: 6 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: "#9E9EB8", font: { size: 11 } }, grid: { color: "#2D2D4A" } },
+          y: { ticks: { color: "#9E9EB8", stepSize: 1 }, grid: { color: "#2D2D4A" }, beginAtZero: true }
+        }
       }
-      adminEmail = user.email;
-      document.getElementById("adminEmail").textContent = adminEmail;
-      startListening();
     });
+  }
 
-    document.getElementById("signoutBtn").addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "index.html";
+  function renderStatusChart(open, prog, res) {
+    if (statusChart) statusChart.destroy();
+    statusChart = new Chart(document.getElementById("chartStatus"), {
+      type: "doughnut",
+      data: {
+        labels: ["Open", "In Progress", "Resolved"],
+        datasets: [{ data: [open, prog, res],
+          backgroundColor: ["#F44336", "#FF9800", "#4CAF50"],
+          borderWidth: 0, hoverOffset: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: "68%",
+        plugins: {
+          legend: { position: "bottom", labels: { color: "#9E9EB8", padding: 16, font: { size: 12 } } }
+        }
+      }
     });
+  }
 
-    function startListening() {
-      const q = query(collection(db, "reports"), orderBy("timestamp", "desc"));
-      onSnapshot(q, (snapshot) => {
-        allReports = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        updateStats(allReports);
-        renderTable(filtered());
+  function renderCategoryBars(reports, total) {
+    const cats = { pothole:"🕳️ Pothole", streetlight:"💡 Streetlight", flooding:"🌊 Flooding", vandalism:"🔨 Vandalism", other:"📌 Other" };
+    const colors = { pothole:"#E8622A", streetlight:"#FBBF24", flooding:"#3B82F6", vandalism:"#8B5CF6", other:"#6B7280" };
+    const counts = {};
+    Object.keys(cats).forEach(k => counts[k] = 0);
+    reports.forEach(r => { if (counts[r.category] !== undefined) counts[r.category]++; });
+
+    document.getElementById("catBars").innerHTML = Object.entries(cats).map(([k, label]) => {
+      const pct = total > 0 ? Math.round((counts[k] / total) * 100) : 0;
+      return `<div class="cat-bar-wrap">
+        <div class="cat-bar-label"><span>${label}</span><span style="color:var(--muted)">${counts[k]} (${pct}%)</span></div>
+        <div class="cat-bar-track"><div class="cat-bar-fill" style="width:${pct}%;background:${colors[k]}"></div></div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderTopUpvoted(reports) {
+    const top = [...reports].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0)).slice(0, 5);
+    document.getElementById("topUpvoted").innerHTML = top.length === 0
+      ? `<div class="empty-state">No reports yet</div>`
+      : top.map(r => `
+        <div class="panel-row" style="cursor:pointer" onclick="window.location='report.html?id=${r.id}'">
+          <div><div>${escHtml(r.title || "—")}</div><div class="sub">${capitalize(r.category || "")}</div></div>
+          <div style="color:var(--accent);font-weight:700">▲ ${r.upvotes || 0}</div>
+        </div>`).join("");
+  }
+
+  function renderTopReporters(reports) {
+    const counts = {};
+    reports.forEach(r => { counts[r.userName || "Anonymous"] = (counts[r.userName || "Anonymous"] || 0) + 1; });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    document.getElementById("topReporters").innerHTML = top.length === 0
+      ? `<div class="empty-state">No data yet</div>`
+      : top.map(([name, count], i) => `
+        <div class="panel-row">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="color:var(--muted);width:16px">${i + 1}</span>
+            <span>${escHtml(name)}</span>
+          </div>
+          <span style="color:var(--muted)">${count} report${count !== 1 ? "s" : ""}</span>
+        </div>`).join("");
+  }
+
+  function renderTodaySummary(reports) {
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    const today = reports.filter(r => r.timestamp?.toDate && r.timestamp.toDate() >= todayStart);
+    const openToday = today.filter(r => r.status === "open").length;
+    const resolvedToday = today.filter(r => r.status === "resolved").length;
+    const avgUpvotes = reports.length > 0
+      ? (reports.reduce((s, r) => s + (r.upvotes || 0), 0) / reports.length).toFixed(1) : 0;
+    const totalUpvotes = reports.reduce((s, r) => s + (r.upvotes || 0), 0);
+
+    document.getElementById("todaySummary").innerHTML = `
+      <div class="panel-row"><span>New reports today</span><strong>${today.length}</strong></div>
+      <div class="panel-row"><span>Open today</span><strong style="color:var(--open)">${openToday}</strong></div>
+      <div class="panel-row"><span>Resolved today</span><strong style="color:var(--resolved)">${resolvedToday}</strong></div>
+      <div class="panel-row"><span>Total upvotes</span><strong style="color:var(--accent)">${totalUpvotes}</strong></div>
+      <div class="panel-row"><span>Avg upvotes/report</span><strong>${avgUpvotes}</strong></div>
+    `;
+  }
+
+  // ---- Reports Table ----
+  function filtered() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    const status = document.getElementById("statusFilter").value;
+    const category = document.getElementById("categoryFilter").value;
+    return allReports.filter(r => {
+      const matchSearch = !search ||
+        (r.title || "").toLowerCase().includes(search) ||
+        (r.address || "").toLowerCase().includes(search);
+      return matchSearch && (!status || r.status === status) && (!category || r.category === category);
+    });
+  }
+
+  function renderTable(reports) {
+    const tbody = document.getElementById("reportsBody");
+    if (reports.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No reports found</td></tr>`; return;
+    }
+    tbody.innerHTML = reports.map(r => {
+      const date = r.timestamp?.toDate
+        ? r.timestamp.toDate().toLocaleDateString("en-GB", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" }) : "—";
+      const bc = r.status === "open" ? "badge-open" : r.status === "in_progress" ? "badge-progress" : "badge-resolved";
+      const bt = r.status === "in_progress" ? "In Progress" : capitalize(r.status);
+      return `<tr onclick="window.location='report.html?id=${r.id}'" data-id="${r.id}">
+        <td><strong>${escHtml(r.title||"—")}</strong></td>
+        <td>${capitalize(r.category||"—")}</td>
+        <td style="color:var(--muted);font-size:13px">${escHtml(r.address||"—")}</td>
+        <td style="color:var(--muted);font-size:13px">${escHtml(r.userName||"—")}</td>
+        <td style="color:var(--muted);font-size:13px">${date}</td>
+        <td style="text-align:center;color:var(--accent)">${r.upvotes||0}</td>
+        <td><span class="badge ${bc}">${bt}</span></td>
+        <td onclick="event.stopPropagation()">
+          <select class="status-select" onchange="changeStatus('${r.id}','${r.status}',this.value)">
+            <option value="open" ${r.status==="open"?"selected":""}>Open</option>
+            <option value="in_progress" ${r.status==="in_progress"?"selected":""}>In Progress</option>
+            <option value="resolved" ${r.status==="resolved"?"selected":""}>Resolved</option>
+          </select>
+        </td>
+      </tr>`;
+    }).join("");
+  }
+
+  window.changeStatus = async (reportId, prevStatus, newStatus) => {
+    if (prevStatus === newStatus) return;
+    try {
+      await updateDoc(doc(db, "reports", reportId), { status: newStatus });
+      await addDoc(collection(db, "reports", reportId, "statusHistory"), {
+        fromStatus: prevStatus, toStatus: newStatus, changedBy: adminEmail, timestamp: serverTimestamp()
       });
-    }
+      showToast(`Status → ${newStatus.replace("_"," ")}`);
+    } catch (e) { showToast("Failed to update status"); }
+  };
 
-    function filtered() {
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      const status = document.getElementById("statusFilter").value;
-      const category = document.getElementById("categoryFilter").value;
-      return allReports.filter(r => {
-        const matchSearch = !search ||
-          (r.title || "").toLowerCase().includes(search) ||
-          (r.address || "").toLowerCase().includes(search);
-        const matchStatus = !status || r.status === status;
-        const matchCat = !category || r.category === category;
-        return matchSearch && matchStatus && matchCat;
-      });
-    }
+  window.showPage = (page, el) => {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".nav-link").forEach(l => l.classList.remove("active"));
+    document.getElementById("page-" + page).classList.add("active");
+    el.classList.add("active");
+    return false;
+  };
 
-    ["searchInput", "statusFilter", "categoryFilter"].forEach(id => {
-      document.getElementById(id).addEventListener("input", () => renderTable(filtered()));
-    });
+  function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : "—"; }
+  function escHtml(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
-    function updateStats(reports) {
-      const counts = { open: 0, in_progress: 0, resolved: 0 };
-      reports.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
-      document.getElementById("stat-open").textContent = counts.open;
-      document.getElementById("stat-progress").textContent = counts.in_progress;
-      document.getElementById("stat-resolved").textContent = counts.resolved;
-    }
-
-    function renderTable(reports) {
-      const tbody = document.getElementById("reportsBody");
-      if (reports.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No reports found</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = reports.map(r => {
-        const date = r.timestamp?.toDate
-          ? r.timestamp.toDate().toLocaleDateString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
-          : "—";
-        const badgeClass = r.status === "open" ? "badge-open" : r.status === "in_progress" ? "badge-progress" : "badge-resolved";
-        const badgeText = r.status === "in_progress" ? "In Progress" : r.status.charAt(0).toUpperCase() + r.status.slice(1);
-        return `
-          <tr onclick="window.location='report.html?id=${r.id}'" data-id="${r.id}">
-            <td><strong>${escHtml(r.title || "—")}</strong></td>
-            <td>${capitalize(r.category || "—")}</td>
-            <td style="color:var(--muted);font-size:13px">${escHtml(r.address || "—")}</td>
-            <td style="color:var(--muted);font-size:13px">${escHtml(r.userName || "—")}</td>
-            <td style="color:var(--muted);font-size:13px">${date}</td>
-            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-            <td onclick="event.stopPropagation()">
-              <select class="status-select" onchange="changeStatus('${r.id}', '${r.status}', this.value)">
-                <option value="open" ${r.status === "open" ? "selected" : ""}>Open</option>
-                <option value="in_progress" ${r.status === "in_progress" ? "selected" : ""}>In Progress</option>
-                <option value="resolved" ${r.status === "resolved" ? "selected" : ""}>Resolved</option>
-              </select>
-            </td>
-          </tr>`;
-      }).join("");
-    }
-
-    window.changeStatus = async (reportId, prevStatus, newStatus) => {
-      if (prevStatus === newStatus) return;
-      try {
-        await updateDoc(doc(db, "reports", reportId), { status: newStatus });
-        await addDoc(collection(db, "reports", reportId, "statusHistory"), {
-          fromStatus: prevStatus,
-          toStatus: newStatus,
-          changedBy: adminEmail,
-          timestamp: serverTimestamp()
-        });
-        showToast(`Status updated to ${newStatus.replace("_", " ")}`);
-      } catch (e) {
-        showToast("Failed to update status");
-      }
-    };
-
-    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-    function escHtml(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-
-    function showToast(msg) {
-      const t = document.createElement("div");
-      t.className = "toast";
-      t.textContent = msg;
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3000);
-    }
-  </script>
+  function showToast(msg) {
+    const t = document.createElement("div");
+    t.className = "toast"; t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+</script>
 </body>
 </html>
