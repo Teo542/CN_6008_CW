@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Users — read own profile, admin reads all, only backend writes role
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isOwner(userId) && request.resource.data.role == "citizen";
+      allow update: if isOwner(userId) &&
+        !("role" in request.resource.data.diff(resource.data).affectedKeys());
+    }
+
+    // Reports — authenticated users can create and read, only owner or admin can update status
+    match /reports/{reportId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.title.size() <= 100;
+      allow update: if isSignedIn() && (
+        // Admin can update anything
+        isAdmin() ||
+        // Any signed-in user can upvote (increment upvotes + add to upvoterIds)
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(["upvotes", "upvoterIds"]) &&
+         !(request.auth.uid in resource.data.get("upvoterIds", [])))
+      );
+
+      // Comments — signed-in users can read and create their own
+      match /comments/{commentId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() &&
+          request.resource.data.userId == request.auth.uid &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() > 0 &&
+          request.resource.data.text.size() <= 500;
+      }
+
+      // Status history — admin writes, everyone reads
+      match /statusHistory/{updateId} {
+        allow read: if isSignedIn();
+        allow create: if isAdmin();
+      }
+    }
+  }
+}

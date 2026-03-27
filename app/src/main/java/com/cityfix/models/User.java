@@ -43,4 +43,5 @@ public class User {
     public void setRole(String role) { this.role = role; }
     public void setReportsSubmitted(int reportsSubmitted) { this.reportsSubmitted = reportsSubmitted; }
     public void setJoinedAt(Timestamp joinedAt) { this.joinedAt = joinedAt; }
+    public void setAvatarColor(String avatarColor) { this.avatarColor = avatarColor; }
 }

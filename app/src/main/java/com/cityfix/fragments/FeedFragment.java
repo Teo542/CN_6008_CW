@@ -90,10 +90,9 @@ public class FeedFragment extends Fragment {
             String lower = query.toLowerCase();
             result = new ArrayList<>();
             for (FaultReport r : allReports) {
-                if (r.getTitle().toLowerCase().contains(lower)
-                        || r.getCategory().toLowerCase().contains(lower)) {
-                    result.add(r);
-                }
+                String t = r.getTitle() != null ? r.getTitle().toLowerCase() : "";
+                String c = r.getCategory() != null ? r.getCategory().toLowerCase() : "";
+                if (t.contains(lower) || c.contains(lower)) result.add(r);
             }
         }
         adapter.updateReports(result);

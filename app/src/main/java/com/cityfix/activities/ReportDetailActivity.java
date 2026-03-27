@@ -79,8 +79,8 @@ public class ReportDetailActivity extends AppCompatActivity {
         tvReporter.setText("Reported by: " + userName);
         tvCategory.setText(category != null ? category.toUpperCase() : "");
         tvStatus.setText(status != null ? status.replace("_", " ").toUpperCase() : "");
-        tvStatus.getBackground().setTint(statusColor(status));
-        tvCategory.getBackground().setTint(categoryColor(category));
+        if (tvStatus.getBackground() != null) tvStatus.getBackground().mutate().setTint(statusColor(status));
+        if (tvCategory.getBackground() != null) tvCategory.getBackground().mutate().setTint(categoryColor(category));
 
         // Comments RecyclerView
         RecyclerView recyclerComments = findViewById(R.id.recycler_comments);
@@ -105,8 +105,13 @@ public class ReportDetailActivity extends AppCompatActivity {
 
         btnUpvote.setOnClickListener(v -> {
             if (reportId == null) return;
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                Toast.makeText(this, "Sign in to upvote", Toast.LENGTH_SHORT).show();
+                return;
+            }
             btnUpvote.setEnabled(false);
-            reportRepository.upvoteReport(reportId)
+            reportRepository.upvoteReport(reportId, currentUser.getUid())
                     .addOnSuccessListener(unused -> loadUpvotes())
                     .addOnFailureListener(e -> {
                         btnUpvote.setEnabled(true);
@@ -123,9 +128,12 @@ public class ReportDetailActivity extends AppCompatActivity {
             if (text.isEmpty() || reportId == null) return;
 
             FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
-            String uid = fbUser != null ? fbUser.getUid() : "";
-            String name = fbUser != null && fbUser.getDisplayName() != null
-                    ? fbUser.getDisplayName() : "User";
+            if (fbUser == null) {
+                Toast.makeText(this, "Sign in to comment", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String uid = fbUser.getUid();
+            String name = fbUser.getDisplayName() != null ? fbUser.getDisplayName() : "User";
 
             btnSend.setEnabled(false);
             Comment comment = new Comment(text, uid, name, false);
@@ -154,7 +162,9 @@ public class ReportDetailActivity extends AppCompatActivity {
                 ImageView iv = findViewById(R.id.iv_report_photo);
                 iv.setImageBitmap(bitmap);
                 iv.setVisibility(View.VISIBLE);
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                Toast.makeText(this, "Could not load photo", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -191,7 +201,14 @@ public class ReportDetailActivity extends AppCompatActivity {
             Long upvotes = doc.getLong("upvotes");
             long count = upvotes != null ? upvotes : 0;
             tvUpvoteCount.setText(count + " people agree");
-            findViewById(R.id.btn_upvote).setEnabled(true);
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            MaterialButton btn = findViewById(R.id.btn_upvote);
+            if (user != null) {
+                java.util.List<?> upvoterIds = (java.util.List<?>) doc.get("upvoterIds");
+                boolean alreadyUpvoted = upvoterIds != null && upvoterIds.contains(user.getUid());
+                btn.setEnabled(!alreadyUpvoted);
+                btn.setText(alreadyUpvoted ? "✓ Upvoted" : "▲ Upvote");
+            }
         });
     }
 

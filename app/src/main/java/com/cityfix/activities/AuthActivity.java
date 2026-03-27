@@ -131,7 +131,7 @@ public class AuthActivity extends AppCompatActivity {
                 .addOnSuccessListener(result -> goToMain())
                 .addOnFailureListener(e -> {
                     setLoading(false);
-                    showError(e.getMessage());
+                    showError("Invalid email or password.");
                 });
     }
 

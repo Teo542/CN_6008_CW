@@ -22,6 +22,7 @@ public class ReportRepository {
 
     private final FirebaseFirestore db;
     private ListenerRegistration listenerRegistration;
+    private final java.util.List<ListenerRegistration> allListeners = new java.util.ArrayList<>();
 
     public ReportRepository() {
         this.db = FirebaseFirestore.getInstance();
@@ -69,7 +70,7 @@ public class ReportRepository {
     }
 
     public void listenToComments(String reportId, MutableLiveData<List<Comment>> liveData) {
-        db.collection(Constants.COLLECTION_REPORTS)
+        ListenerRegistration reg = db.collection(Constants.COLLECTION_REPORTS)
                 .document(reportId)
                 .collection(Constants.COLLECTION_COMMENTS)
                 .orderBy("timestamp", Query.Direction.ASCENDING)
@@ -85,6 +86,7 @@ public class ReportRepository {
                     }
                     liveData.postValue(list);
                 });
+        allListeners.add(reg);
     }
 
     public Task<DocumentReference> addStatusUpdate(String reportId, StatusUpdate update) {
@@ -102,10 +104,20 @@ public class ReportRepository {
                 .get();
     }
 
-    public Task<Void> upvoteReport(String reportId) {
-        return db.collection(Constants.COLLECTION_REPORTS)
-                .document(reportId)
-                .update("upvotes", FieldValue.increment(1));
+    public Task<Void> upvoteReport(String reportId, String userId) {
+        var ref = db.collection(Constants.COLLECTION_REPORTS).document(reportId);
+        return db.runTransaction(transaction -> {
+            var snap = transaction.get(ref);
+            java.util.List<?> upvoterIds = (java.util.List<?>) snap.get("upvoterIds");
+            if (upvoterIds != null && upvoterIds.contains(userId)) return null;
+            transaction.update(ref, "upvotes", FieldValue.increment(1));
+            transaction.update(ref, "upvoterIds", FieldValue.arrayUnion(userId));
+            return null;
+        });
+    }
+
+    public Task<DocumentSnapshot> hasUpvoted(String reportId, String userId) {
+        return db.collection(Constants.COLLECTION_REPORTS).document(reportId).get();
     }
 
     public Task<DocumentSnapshot> getReport(String reportId) {
@@ -113,7 +125,7 @@ public class ReportRepository {
     }
 
     public void listenToUserReports(String userId, MutableLiveData<List<FaultReport>> liveData) {
-        db.collection(Constants.COLLECTION_REPORTS)
+        ListenerRegistration reg = db.collection(Constants.COLLECTION_REPORTS)
                 .whereEqualTo("userId", userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
@@ -128,11 +140,12 @@ public class ReportRepository {
                     }
                     liveData.postValue(reports);
                 });
+        allListeners.add(reg);
     }
 
     public void removeListener() {
-        if (listenerRegistration != null) {
-            listenerRegistration.remove();
-        }
+        if (listenerRegistration != null) listenerRegistration.remove();
+        for (ListenerRegistration r : allListeners) r.remove();
+        allListeners.clear();
     }
 }

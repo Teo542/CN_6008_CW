@@ -36,6 +36,9 @@
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const reportId = new URLSearchParams(location.search).get("id");
+    if (!reportId || reportId.trim() === "") {
+      document.getElementById("content").textContent = "Invalid report ID.";
+    }
     let adminEmail = "";
     let currentStatus = "";
 
@@ -202,6 +205,7 @@
       const input = document.getElementById("commentInput");
       const text = input.value.trim();
       if (!text) return;
+      if (text.length > 500) { showToast("Comment too long (max 500 chars)"); return; }
       input.value = "";
       try {
         await addDoc(collection(db, "reports", reportId, "comments"), {

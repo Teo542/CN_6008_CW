@@ -232,6 +232,14 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
             showError("Please enter a title.");
             return;
         }
+        if (title.length() > 100) {
+            showError("Title must be under 100 characters.");
+            return;
+        }
+        if (description.length() > 500) {
+            showError("Description must be under 500 characters.");
+            return;
+        }
         if (currentLat == 0 && currentLng == 0) {
             currentLat = 37.9838;
             currentLng = 23.7275;

@@ -55,7 +55,15 @@
       btn.textContent = "Signing in…";
 
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const snap = await getDoc(doc(db, "users", cred.user.uid));
+        if (!snap.exists() || snap.data().role !== "admin") {
+          await auth.signOut();
+          errorMsg.textContent = "Access denied. Admin accounts only.";
+          btn.disabled = false;
+          btn.textContent = "Sign In";
+          return;
+        }
         window.location.href = "dashboard.html";
       } catch (e) {
         errorMsg.textContent = "Invalid email or password.";
