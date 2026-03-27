@@ -1,28 +1,30 @@
 # CityFix — CN6008 Coursework
 
-An Android application that lets citizens report urban faults (potholes, broken streetlights, flooding, vandalism) and track their resolution in real time. Admins manage and update report statuses through a dedicated dashboard.
+An Android application that lets citizens report urban faults (potholes, broken streetlights, flooding, vandalism) and track their resolution in real time. Admins manage and update report statuses through both an in-app dashboard and a dedicated web admin portal.
 
 ---
 
 ## Features
 
-### Citizens
+### Citizens (Android App)
 - **Register / Login** via email & password (Firebase Auth)
-- **Interactive Map** — browse all reports as markers; pan the map to target a precise location before submitting
-- **Submit a Report** — choose category, write title & description; location is taken from the map centre crosshair
+- **Interactive Map** — browse all reports as colour-coded markers; pan the map to target a precise location before submitting
+- **Submit a Report** — choose category, write title & description; location is taken from the map centre crosshair; attach a photo
 - **Feed** — scrollable list of all reports with search and category filter chips
 - **Upvote** reports to signal urgency
 - **Comments** — real-time comment thread on each report
 - **Status History** — full timeline of every status change on a report
 - **My Reports** — profile tab shows only your own submissions
 - **View on Map** — tap Map on any feed card to fly the map camera to that report's location
-- **Settings Panel** — sign out, access admin dashboard (if admin)
+- **Settings Panel** — change display name, avatar colour, sign out
 
-### Admins
-- **Admin Dashboard** — full list of all reports
-- **Status Management** — change report status (Open → In Progress → Resolved)
-- **Stats Bar** — live counts of Open / In Progress / Resolved reports
-- **Status History** — every change is logged with admin name and timestamp
+### Admins (Web Portal + Android)
+- **Web Admin Portal** — browser-based dashboard at `admin/index.html`
+- **Live Stats** — real-time counts of Open / In Progress / Resolved reports
+- **Reports Table** — search, filter by status and category, inline status change
+- **Report Detail** — full info, change status, post admin comments, view status history, open location in Google Maps
+- **Real-time sync** — any change on the web portal instantly reflects in the Android app (same Firestore database)
+- **Android Admin Dashboard** — accessible via Profile → Settings (requires `role: admin` in Firestore)
 
 ---
 
@@ -36,6 +38,7 @@ An Android application that lets citizens report urban faults (potholes, broken 
 | Database | Cloud Firestore (real-time listeners) |
 | Maps | Google Maps SDK for Android |
 | Architecture | MVVM + LiveData + Repository pattern |
+| Admin Portal | Vanilla HTML/CSS/JS + Firebase Web SDK v10 |
 
 ---
 
@@ -47,13 +50,13 @@ app/src/main/java/com/cityfix/
 │   ├── AuthActivity.java           — Login & Register screens
 │   ├── MainActivity.java           — Bottom nav host, location permission
 │   ├── ReportDetailActivity.java   — Upvotes, comments, status history
-│   └── AdminDashboardActivity.java — Admin report management + stats
+│   └── AdminDashboardActivity.java — In-app admin report management
 ├── fragments/
 │   ├── MapFragment.java            — Google Map with report markers + crosshair
 │   ├── FeedFragment.java           — Report list, search, filter chips
 │   ├── ProfileFragment.java        — User info, my reports, stats
-│   ├── SubmitReportFragment.java   — Bottom sheet report form
-│   └── SettingsFragment.java       — Sign out, admin access
+│   ├── SubmitReportFragment.java   — Bottom sheet report form + camera
+│   └── SettingsFragment.java       — Display name, avatar, sign out
 ├── adapters/
 │   ├── ReportAdapter.java          — Feed & admin list cards
 │   └── CommentAdapter.java         — Comment thread
@@ -67,6 +70,13 @@ app/src/main/java/com/cityfix/
 │   └── UserRepository.java         — User profile operations
 └── utils/
     └── Constants.java
+
+admin/                              — Web admin portal
+├── index.html                      — Login page
+├── dashboard.html                  — Reports table + live stats
+├── report.html                     — Report detail + status + comments
+├── firebase.js                     — Firebase initialisation
+└── style.css                       — Dark theme styles
 ```
 
 ---
@@ -95,10 +105,19 @@ Google Maps does **not** work on plain AOSP emulators. Use a system image tagged
 ### 4. Admin Access
 To grant admin rights to a user:
 1. Open Firestore → `users` collection → find the user document
-2. Set the `role` field to `admin`
-3. The user will see **Admin Dashboard** in their Settings panel
+2. Set the `role` field to `"admin"`
+3. The user can access the **Android Admin Dashboard** via Profile → Settings
+4. The user can log into the **Web Admin Portal** (see below)
 
-### 5. Open in Android Studio
+### 5. Web Admin Portal
+Run a local server from the `admin/` folder:
+```bash
+cd admin
+python -m http.server 8080
+```
+Then open `http://localhost:8080` in your browser. Log in with any Firebase account that has `role: "admin"` in Firestore.
+
+### 6. Open in Android Studio
 Open the project root in Android Studio — Gradle will sync automatically.
 
 ---
@@ -107,14 +126,14 @@ Open the project root in Android Studio — Gradle will sync automatically.
 
 ```
 users/{uid}
-  name, email, role ("citizen" | "admin"), reportsCount
+  displayName, email, role ("citizen" | "admin"), reportsSubmitted, avatarColor, joinedAt
 
 reports/{reportId}
   title, description, category, status, latitude, longitude
   address, userId, userName, upvotes, timestamp
 
   statusHistory/{updateId}
-    status, changedBy, timestamp, note
+    fromStatus, toStatus, changedBy, timestamp
 
   comments/{commentId}
     text, userName, userId, timestamp
@@ -128,3 +147,4 @@ reports/{reportId}
 - [x] Sprint 2 — Google Maps integration, submit report flow, Firestore persistence
 - [x] Sprint 3 — Feed, search & filter, report detail, admin dashboard, status management
 - [x] Sprint 4 — Upvotes, comments, status history, my reports, view on map, settings panel, UI polish
+- [x] Sprint 5 — Web admin portal, camera on reports, real-time map sync, profile updates
