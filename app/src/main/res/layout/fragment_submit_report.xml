@@ -167,6 +167,47 @@
             android:textColorHint="#9E9EB8" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- Photo section -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_add_photo"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="10dp"
+        android:text="📷  Add Photo"
+        android:textColor="#9E9EB8"
+        android:textSize="14sp"
+        app:strokeColor="#5A5A8A"
+        app:cornerRadius="10dp" />
+
+    <FrameLayout
+        android:id="@+id/layout_photo_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_photo_preview"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/dark_card" />
+
+        <TextView
+            android:id="@+id/tv_remove_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:text="✕"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:background="#99000000"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp" />
+    </FrameLayout>
+
     <!-- Location pill -->
     <LinearLayout
         android:id="@+id/row_location"

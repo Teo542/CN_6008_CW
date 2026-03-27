@@ -54,6 +54,16 @@
                 android:background="@drawable/badge_background" />
         </LinearLayout>
 
+        <!-- Report Photo -->
+        <ImageView
+            android:id="@+id/iv_report_photo"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/dark_card"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone" />
+
         <!-- Title -->
         <TextView
             android:id="@+id/tv_title"

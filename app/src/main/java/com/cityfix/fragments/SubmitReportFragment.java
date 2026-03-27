@@ -2,10 +2,14 @@ package com.cityfix.fragments;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -25,6 +29,8 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.ByteArrayOutputStream;
+
 public class SubmitReportFragment extends BottomSheetDialogFragment {
 
     private LocationHelper locationHelper;
@@ -35,15 +41,28 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
     private TextInputEditText etTitle, etDescription;
     private TextView tvLocation, tvError;
     private MaterialButton btnSubmit;
+    private ImageView ivPhotoPreview;
+    private FrameLayout layoutPhotoPreview;
 
     private double currentLat = 0, currentLng = 0;
     private String currentAddress = "";
     private String selectedCategory = "other";
+    private Bitmap capturedPhoto = null;
 
     private final ActivityResultLauncher<String> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
                 if (granted) detectLocation();
                 else tvLocation.setText("Location permission denied");
+            });
+
+    private final ActivityResultLauncher<String> cameraPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) takePictureLauncher.launch(null);
+            });
+
+    private final ActivityResultLauncher<Void> takePictureLauncher =
+            registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), bitmap -> {
+                if (bitmap != null) showPhotoPreview(bitmap);
             });
 
     @Nullable
@@ -73,6 +92,11 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
         tvLocation = view.findViewById(R.id.tv_location);
         tvError = view.findViewById(R.id.tv_error);
         btnSubmit = view.findViewById(R.id.btn_submit);
+        ivPhotoPreview = view.findViewById(R.id.iv_photo_preview);
+        layoutPhotoPreview = view.findViewById(R.id.layout_photo_preview);
+
+        view.findViewById(R.id.btn_add_photo).setOnClickListener(v -> openCamera());
+        view.findViewById(R.id.tv_remove_photo).setOnClickListener(v -> removePhoto());
 
         setupCategoryChips();
         requestLocationAndDetect();
@@ -83,6 +107,33 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
                     "Pan the map to your location, then tap +", android.widget.Toast.LENGTH_SHORT).show();
             dismiss();
         });
+    }
+
+    private void openCamera() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            takePictureLauncher.launch(null);
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void showPhotoPreview(Bitmap bitmap) {
+        capturedPhoto = bitmap;
+        ivPhotoPreview.setImageBitmap(bitmap);
+        layoutPhotoPreview.setVisibility(View.VISIBLE);
+    }
+
+    private void removePhoto() {
+        capturedPhoto = null;
+        ivPhotoPreview.setImageBitmap(null);
+        layoutPhotoPreview.setVisibility(View.GONE);
+    }
+
+    private String bitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
     private void setupCategoryChips() {
@@ -100,7 +151,6 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
     }
 
     private void requestLocationAndDetect() {
-        // Use map centre coordinates if passed from MapFragment
         android.os.Bundle args = getArguments();
         if (args != null && args.containsKey("lat")) {
             currentLat = args.getDouble("lat");
@@ -171,6 +221,10 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
                     currentLat, currentLng, currentAddress,
                     uid, userName
             );
+
+            if (capturedPhoto != null) {
+                report.setImageUrl(bitmapToBase64(capturedPhoto));
+            }
 
             reportRepository.addReport(report)
                     .addOnSuccessListener(ref -> {

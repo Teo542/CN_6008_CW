@@ -1,8 +1,12 @@
 package com.cityfix.activities;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -94,6 +98,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         reportRepository = new ReportRepository();
         loadUpvotes();
         loadStatusHistory();
+        loadPhoto();
         if (reportId != null) {
             reportRepository.listenToComments(reportId, commentsLiveData);
         }
@@ -133,6 +138,23 @@ public class ReportDetailActivity extends AppCompatActivity {
                         btnSend.setEnabled(true);
                         Toast.makeText(this, "Failed to post comment", Toast.LENGTH_SHORT).show();
                     });
+        });
+    }
+
+    private void loadPhoto() {
+        if (reportId == null) return;
+        reportRepository.getReport(reportId).addOnSuccessListener(doc -> {
+            if (doc == null || !doc.exists()) return;
+            String imageUrl = doc.getString("imageUrl");
+            if (imageUrl == null || imageUrl.isEmpty()) return;
+            try {
+                byte[] bytes = Base64.decode(imageUrl, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                if (bitmap == null) return;
+                ImageView iv = findViewById(R.id.iv_report_photo);
+                iv.setImageBitmap(bitmap);
+                iv.setVisibility(View.VISIBLE);
+            } catch (Exception ignored) {}
         });
     }
 
