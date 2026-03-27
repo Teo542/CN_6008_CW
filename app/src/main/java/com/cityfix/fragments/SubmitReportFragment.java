@@ -55,14 +55,14 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
                 else tvLocation.setText("Location permission denied");
             });
 
-    private final ActivityResultLauncher<String> cameraPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted) takePictureLauncher.launch(null);
-            });
-
     private final ActivityResultLauncher<Void> takePictureLauncher =
             registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), bitmap -> {
                 if (bitmap != null) showPhotoPreview(bitmap);
+            });
+
+    private final ActivityResultLauncher<String> cameraPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) takePictureLauncher.launch(null);
             });
 
     @Nullable
