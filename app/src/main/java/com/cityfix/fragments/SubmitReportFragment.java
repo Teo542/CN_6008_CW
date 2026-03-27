@@ -3,6 +3,8 @@ package com.cityfix.fragments;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -17,6 +19,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 import com.cityfix.R;
 import com.cityfix.models.FaultReport;
@@ -48,6 +55,7 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
     private String currentAddress = "";
     private String selectedCategory = "other";
     private Bitmap capturedPhoto = null;
+    private Uri photoUri = null;
 
     private final ActivityResultLauncher<String> locationPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
@@ -55,14 +63,14 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
                 else tvLocation.setText("Location permission denied");
             });
 
-    private final ActivityResultLauncher<Void> takePictureLauncher =
-            registerForActivityResult(new ActivityResultContracts.TakePicturePreview(), bitmap -> {
-                if (bitmap != null) showPhotoPreview(bitmap);
+    private final ActivityResultLauncher<Uri> takePictureLauncher =
+            registerForActivityResult(new ActivityResultContracts.TakePicture(), success -> {
+                if (success && photoUri != null) loadPhotoFromUri(photoUri);
             });
 
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-                if (granted) takePictureLauncher.launch(null);
+                if (granted) launchCamera();
             });
 
     @Nullable
@@ -112,9 +120,34 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
     private void openCamera() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
-            takePictureLauncher.launch(null);
+            launchCamera();
         } else {
             cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        }
+    }
+
+    private void launchCamera() {
+        try {
+            File imageFile = File.createTempFile("report_", ".jpg",
+                    new File(requireContext().getCacheDir(), "images"));
+            imageFile.getParentFile().mkdirs();
+            photoUri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider", imageFile);
+            takePictureLauncher.launch(photoUri);
+        } catch (IOException e) {
+            android.widget.Toast.makeText(requireContext(),
+                    "Could not open camera", android.widget.Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadPhotoFromUri(Uri uri) {
+        try {
+            InputStream is = requireContext().getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(is);
+            if (bitmap != null) showPhotoPreview(bitmap);
+        } catch (IOException e) {
+            android.widget.Toast.makeText(requireContext(),
+                    "Could not load photo", android.widget.Toast.LENGTH_SHORT).show();
         }
     }
 
