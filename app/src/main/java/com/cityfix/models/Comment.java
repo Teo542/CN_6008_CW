@@ -2,6 +2,12 @@ package com.cityfix.models;
 
 import com.google.firebase.Timestamp;
 
+/**
+ * Domain model representing a comment posted on a fault report.
+ * Tracks the author, comment text, creation timestamp, and whether the comment
+ * was made by an official (admin) account. The no-argument constructor is
+ * required by the Firestore SDK for automatic object deserialization.
+ */
 public class Comment {
 
     private String commentId;

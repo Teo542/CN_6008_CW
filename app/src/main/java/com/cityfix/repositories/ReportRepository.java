@@ -18,6 +18,14 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Data-access layer for fault report operations against Cloud Firestore.
+ * Encapsulates all CRUD, upvote, comment, and status-history operations for
+ * the {@code reports} collection. Real-time listeners push updates directly
+ * into {@link androidx.lifecycle.MutableLiveData} instances so the UI stays
+ * in sync without manual polling. Call {@link #removeListener()} when the
+ * owning component is destroyed to avoid memory leaks.
+ */
 public class ReportRepository {
 
     private final FirebaseFirestore db;

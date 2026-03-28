@@ -38,6 +38,13 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.ByteArrayOutputStream;
 
+/**
+ * Bottom-sheet dialog for submitting a new fault report. Captures a title,
+ * description, category (via chip group), an optional photo (camera), and
+ * the current device location or map-centre coordinates passed in as arguments.
+ * On submission, a {@link com.cityfix.models.FaultReport} is written to
+ * Firestore and the user's report count is incremented.
+ */
 public class SubmitReportFragment extends BottomSheetDialogFragment {
 
     private LocationHelper locationHelper;

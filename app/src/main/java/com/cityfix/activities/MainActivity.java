@@ -18,6 +18,13 @@ import com.cityfix.fragments.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+/**
+ * Root activity that hosts the bottom navigation and main fragment container.
+ * Redirects unauthenticated users to {@link AuthActivity}. Manages swapping
+ * between {@link com.cityfix.fragments.MapFragment}, {@link com.cityfix.fragments.FeedFragment},
+ * and {@link com.cityfix.fragments.ProfileFragment}, and requests location permission
+ * on first launch.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView bottomNav;

@@ -2,6 +2,12 @@ package com.cityfix.models;
 
 import com.google.firebase.Timestamp;
 
+/**
+ * Domain model representing a citizen-submitted fault report.
+ * Stores the report's textual content, geographic coordinates, lifecycle status,
+ * upvote tally, and an optional Base64-encoded photo. The no-argument constructor
+ * is required by the Firestore SDK for automatic object deserialization.
+ */
 public class FaultReport {
 
     private String reportId;

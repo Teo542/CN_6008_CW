@@ -26,6 +26,14 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Renders an interactive Google Map showing geolocated fault report markers.
+ * Colour-codes markers by report status (red = open, orange = in-progress,
+ * green = resolved) and supports chip-based filtering. A floating action button
+ * opens {@link SubmitReportFragment} pre-populated with the current map centre
+ * coordinates. Optionally accepts {@code focus_lat} / {@code focus_lng} arguments
+ * to pan the camera to a specific report on load.
+ */
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap googleMap;

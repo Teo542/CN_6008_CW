@@ -22,6 +22,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
+/**
+ * Bottom-sheet dialog that exposes user account settings: changing the display name,
+ * choosing an avatar colour, and signing out. Changes are persisted to Firestore
+ * via {@link com.cityfix.repositories.UserRepository}. Signing out clears the
+ * back stack and returns the user to {@link com.cityfix.activities.AuthActivity}.
+ */
 public class SettingsFragment extends BottomSheetDialogFragment {
 
     private final UserRepository userRepository = new UserRepository();

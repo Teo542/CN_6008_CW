@@ -32,6 +32,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Displays the full details of a single fault report, including the photo,
+ * status history timeline, upvote count, and a live comment thread.
+ * Report metadata is received via Intent extras. Real-time comment updates
+ * are delivered through a {@link androidx.lifecycle.MutableLiveData} listener
+ * registered against {@link ReportRepository}.
+ */
 public class ReportDetailActivity extends AppCompatActivity {
 
     private ReportRepository reportRepository;

@@ -16,6 +16,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * RecyclerView adapter that displays a chronological list of {@link Comment} objects
+ * on the report detail screen. Each item shows the author name, comment text,
+ * timestamp, and an "Official" badge when the comment originates from an admin.
+ */
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.VH> {
 
     private List<Comment> comments;

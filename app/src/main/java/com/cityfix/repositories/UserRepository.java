@@ -9,6 +9,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+/**
+ * Data-access layer for user profile operations against Cloud Firestore.
+ * Wraps create, read, real-time listen, and field-update operations for the
+ * {@code users} collection. Also exposes a convenience method for retrieving
+ * the currently authenticated user's UID from Firebase Authentication.
+ */
 public class UserRepository {
 
     private final FirebaseFirestore db;

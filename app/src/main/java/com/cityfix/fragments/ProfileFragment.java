@@ -28,6 +28,12 @@ import com.cityfix.repositories.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Shows the authenticated user's profile: avatar, display name, email,
+ * report submission count, and a personal list of submitted reports.
+ * Data is delivered through {@link androidx.lifecycle.MutableLiveData} listeners
+ * so the UI updates in real time. A settings icon opens {@link SettingsFragment}.
+ */
 public class ProfileFragment extends Fragment {
 
     private UserRepository userRepository;

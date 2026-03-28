@@ -18,13 +18,31 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * RecyclerView adapter that binds a list of {@link FaultReport} objects to
+ * report card views. Supports two callback interfaces: one for opening the
+ * detail screen and one for navigating to the report's map pin. Category and
+ * status badges are tinted with their respective semantic colours.
+ */
 public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder> {
 
+    /**
+     * Callback invoked when the user taps a report card to view its details.
+     */
     public interface OnReportClickListener {
+        /**
+         * @param report the report that was tapped
+         */
         void onReportClick(FaultReport report);
     }
 
+    /**
+     * Callback invoked when the user taps the "view on map" action within a card.
+     */
     public interface OnMapClickListener {
+        /**
+         * @param report the report whose map pin should be focused
+         */
         void onMapClick(FaultReport report);
     }
 

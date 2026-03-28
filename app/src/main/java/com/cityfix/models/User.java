@@ -2,6 +2,13 @@ package com.cityfix.models;
 
 import com.google.firebase.Timestamp;
 
+/**
+ * Domain model representing an application user.
+ * Holds profile information (display name, email, avatar colour), the user's
+ * assigned role ({@code citizen} or {@code admin}), and the total number of
+ * reports submitted. The no-argument constructor is required by the Firestore SDK
+ * for automatic object deserialization.
+ */
 public class User {
 
     private String userId;

@@ -1,5 +1,11 @@
 package com.cityfix.utils;
 
+/**
+ * Central repository for application-wide string constants.
+ * Groups Firestore collection names, report status values, user role identifiers,
+ * fault category identifiers, Intent extra keys, and Firebase Storage path prefixes.
+ * All fields are {@code public static final} — this class is not meant to be instantiated.
+ */
 public class Constants {
 
     // Firestore collections

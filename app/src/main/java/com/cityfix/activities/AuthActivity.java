@@ -21,6 +21,13 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Handles user authentication, providing both sign-in and registration flows.
+ * Manages form mode toggling between login and register, validates user input,
+ * and delegates credential operations to Firebase Authentication. On successful
+ * authentication, creates a Firestore user profile (for new accounts) and
+ * navigates to {@link MainActivity}.
+ */
 public class AuthActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;

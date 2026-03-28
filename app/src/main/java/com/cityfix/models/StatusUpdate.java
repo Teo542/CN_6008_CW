@@ -2,6 +2,13 @@ package com.cityfix.models;
 
 import com.google.firebase.Timestamp;
 
+/**
+ * Domain model representing a single audit-trail entry for a report status change.
+ * Records the previous and new status values, the admin who made the change,
+ * an optional explanatory note, and the timestamp of the transition.
+ * The no-argument constructor is required by the Firestore SDK for automatic
+ * object deserialization.
+ */
 public class StatusUpdate {
 
     private String updateId;

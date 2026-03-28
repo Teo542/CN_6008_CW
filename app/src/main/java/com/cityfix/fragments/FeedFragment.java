@@ -27,6 +27,13 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Displays a scrollable, searchable list of all fault reports.
+ * Observes the shared {@link com.cityfix.viewmodels.MapViewModel} for live report
+ * updates and filters the list client-side as the user types in the search field.
+ * Tapping a report opens {@link ReportDetailActivity}; tapping the map icon
+ * navigates to the corresponding pin in {@link com.cityfix.fragments.MapFragment}.
+ */
 public class FeedFragment extends Fragment {
 
     private RecyclerView recyclerReports;
