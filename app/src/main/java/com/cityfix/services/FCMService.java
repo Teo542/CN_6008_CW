@@ -8,12 +8,12 @@ public class FCMService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        // TODO Sprint 4: show notification when report status changes
+        // Reserved for future push-notification support.
     }
 
     @Override
     public void onNewToken(String token) {
         super.onNewToken(token);
-        // TODO Sprint 4: save token to Firestore for push notifications
+        // Reserved for future FCM token persistence.
     }
 }
