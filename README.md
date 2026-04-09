@@ -100,7 +100,7 @@ firestore.rules                     — Server-side security rules
 4. Ensure **billing is enabled** (Maps requires it even on free tier)
 5. Paste the key into `app/src/main/res/values/strings.xml`:
    ```xml
-   <string name="google_maps_key">YOUR_KEY_HERE</string>
+   <string name="maps_api_key">YOUR_KEY_HERE</string>
    ```
 
 ### 3. Emulator Requirements
