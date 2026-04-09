@@ -154,6 +154,43 @@ reports/{reportId}
 
 ---
 
+## Testing / Verification
+
+This prototype is verified through build checks and manual smoke testing. A full automated test suite is not included in the coursework prototype.
+
+### Android Build
+Run the debug build from the project root:
+```bash
+./gradlew :app:assembleDebug
+```
+On Windows:
+```bash
+.\gradlew.bat :app:assembleDebug
+```
+
+### Admin Portal Smoke Test
+Run a local static server from the `admin/` folder:
+```bash
+cd admin
+python -m http.server 8080
+```
+Then open `http://localhost:8080` and verify:
+- The admin login page loads
+- Invalid credentials show an error message
+- Password reset requires an email address
+- Direct access to `dashboard.html` redirects unauthenticated users back to login
+- Authenticated admin users can view dashboard metrics, filter reports, and update report status
+
+### Manual App Verification
+The Android app should be checked on an emulator or device with Google Play services:
+- Register and log in with Firebase Authentication
+- Submit a report with category, title, description, map location, and optional photo
+- Confirm the report appears on the map and feed in real time
+- Open report details, add a comment, and upvote once per user
+- Confirm profile and "My Reports" screens reflect the user's submitted reports
+
+---
+
 ## Future Improvements
 
 The following features were identified as meaningful extensions beyond the current prototype scope. They are documented here as a roadmap for a production-ready version of CityFix.
