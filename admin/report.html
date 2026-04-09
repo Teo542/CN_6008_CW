@@ -206,11 +206,15 @@
       const text = input.value.trim();
       if (!text) return;
       if (text.length > 500) { showToast("Comment too long (max 500 chars)"); return; }
+      const currentUser = auth.currentUser;
+      if (!currentUser) { showToast("You must be signed in"); return; }
       input.value = "";
       try {
         await addDoc(collection(db, "reports", reportId, "comments"), {
           text,
+          userId: currentUser.uid,
           userName: adminEmail,
+          isOfficial: true,
           timestamp: serverTimestamp()
         });
         showToast("Comment posted");
