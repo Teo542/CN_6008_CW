@@ -96,9 +96,10 @@ firestore.rules                     — Server-side security rules
 ### 2. Google Maps API Key
 1. Go to [Google Cloud Console](https://console.cloud.google.com) → your Firebase project
 2. Enable **Maps SDK for Android**
-3. Create an API key (unrestricted, or restrict to Maps SDK for Android)
-4. Ensure **billing is enabled** (Maps requires it even on free tier)
-5. Paste the key into `app/src/main/res/values/strings.xml`:
+3. Create an API key and restrict it to **Maps SDK for Android**
+4. Add an Android app restriction for package `com.cityfix` and the app signing SHA-1
+5. Ensure **billing is enabled** (Maps requires it even on free tier)
+6. Paste the key into `app/src/main/res/values/strings.xml`:
    ```xml
    <string name="maps_api_key">YOUR_KEY_HERE</string>
    ```
