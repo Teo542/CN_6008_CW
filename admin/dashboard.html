@@ -167,6 +167,7 @@
   let allReports = [];
   let adminEmail = "";
   let trendChart, statusChart;
+  const pendingStatusUpdates = new Set();
 
   // Auth guard
   onAuthStateChanged(auth, async (user) => {
@@ -375,7 +376,7 @@
         <td style="text-align:center;color:var(--accent)">${r.upvotes||0}</td>
         <td><span class="badge ${bc}">${bt}</span></td>
         <td onclick="event.stopPropagation()">
-          <select class="status-select" onchange="changeStatus('${r.id}','${r.status}',this.value)">
+          <select class="status-select" onchange="changeStatus('${r.id}','${r.status}',this.value,this)">
             <option value="open" ${r.status==="open"?"selected":""}>Open</option>
             <option value="in_progress" ${r.status==="in_progress"?"selected":""}>In Progress</option>
             <option value="resolved" ${r.status==="resolved"?"selected":""}>Resolved</option>
@@ -385,15 +386,24 @@
     }).join("");
   }
 
-  window.changeStatus = async (reportId, prevStatus, newStatus) => {
+  window.changeStatus = async (reportId, prevStatus, newStatus, selectEl) => {
     if (prevStatus === newStatus) return;
+    if (pendingStatusUpdates.has(reportId)) return;
+    pendingStatusUpdates.add(reportId);
+    if (selectEl) selectEl.disabled = true;
     try {
       await updateDoc(doc(db, "reports", reportId), { status: newStatus });
       await addDoc(collection(db, "reports", reportId, "statusHistory"), {
         fromStatus: prevStatus, toStatus: newStatus, changedBy: adminEmail, timestamp: serverTimestamp()
       });
       showToast(`Status → ${newStatus.replace("_"," ")}`);
-    } catch (e) { showToast("Failed to update status"); }
+    } catch (e) {
+      if (selectEl) selectEl.value = prevStatus;
+      showToast("Failed to update status");
+    } finally {
+      pendingStatusUpdates.delete(reportId);
+      if (selectEl) selectEl.disabled = false;
+    }
   };
 
   window.showPage = (page, el) => {

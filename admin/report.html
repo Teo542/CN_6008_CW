@@ -41,6 +41,8 @@
     }
     let adminEmail = "";
     let currentStatus = "";
+    let statusUpdatePending = false;
+    let commentPostPending = false;
 
     // Auth guard
     onAuthStateChanged(auth, async (user) => {
@@ -86,6 +88,7 @@
         : "—";
       const badgeClass = r.status === "open" ? "badge-open" : r.status === "in_progress" ? "badge-progress" : "badge-resolved";
       const badgeText = r.status === "in_progress" ? "In Progress" : capitalize(r.status);
+      const statusDisabled = statusUpdatePending ? "disabled" : "";
 
       document.getElementById("content").innerHTML = `
         <div class="page-title">${escHtml(r.title || "Untitled")}</div>
@@ -129,11 +132,11 @@
             <div class="card">
               <h3>Change Status</h3>
               <div class="status-btn-group">
-                <button class="status-btn open-btn ${r.status === 'open' ? 'active' : ''}"
+                <button class="status-btn open-btn ${r.status === 'open' ? 'active' : ''}" ${statusDisabled}
                   onclick="setStatus('open')">🔴 Open</button>
-                <button class="status-btn progress-btn ${r.status === 'in_progress' ? 'active' : ''}"
+                <button class="status-btn progress-btn ${r.status === 'in_progress' ? 'active' : ''}" ${statusDisabled}
                   onclick="setStatus('in_progress')">🟠 In Progress</button>
-                <button class="status-btn resolved-btn ${r.status === 'resolved' ? 'active' : ''}"
+                <button class="status-btn resolved-btn ${r.status === 'resolved' ? 'active' : ''}" ${statusDisabled}
                   onclick="setStatus('resolved')">🟢 Resolved</button>
               </div>
             </div>
@@ -186,6 +189,9 @@
 
     window.setStatus = async (newStatus) => {
       if (newStatus === currentStatus) return;
+      if (statusUpdatePending) return;
+      statusUpdatePending = true;
+      setStatusButtonsDisabled(true);
       const prev = currentStatus;
       try {
         await updateDoc(doc(db, "reports", reportId), { status: newStatus });
@@ -198,16 +204,23 @@
         showToast(`Status → ${newStatus.replace("_", " ")}`);
       } catch (e) {
         showToast("Failed to update");
+      } finally {
+        statusUpdatePending = false;
+        setStatusButtonsDisabled(false);
       }
     };
 
     window.postComment = async () => {
+      if (commentPostPending) return;
       const input = document.getElementById("commentInput");
       const text = input.value.trim();
       if (!text) return;
       if (text.length > 500) { showToast("Comment too long (max 500 chars)"); return; }
       const currentUser = auth.currentUser;
       if (!currentUser) { showToast("You must be signed in"); return; }
+      commentPostPending = true;
+      const sendBtn = input.parentElement?.querySelector("button");
+      if (sendBtn) sendBtn.disabled = true;
       input.value = "";
       try {
         await addDoc(collection(db, "reports", reportId, "comments"), {
@@ -220,6 +233,9 @@
         showToast("Comment posted");
       } catch (e) {
         showToast("Failed to post comment");
+      } finally {
+        commentPostPending = false;
+        if (sendBtn) sendBtn.disabled = false;
       }
     };
 
@@ -231,6 +247,10 @@
 
     function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : "—"; }
     function escHtml(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+    function setStatusButtonsDisabled(disabled) {
+      document.querySelectorAll(".status-btn").forEach(btn => { btn.disabled = disabled; });
+    }
 
     function showToast(msg) {
       const t = document.createElement("div");
