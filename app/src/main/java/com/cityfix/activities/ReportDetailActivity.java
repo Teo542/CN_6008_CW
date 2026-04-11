@@ -178,10 +178,12 @@ public class ReportDetailActivity extends AppCompatActivity {
     private void loadStatusHistory() {
         if (reportId == null) return;
         reportRepository.getStatusHistory(reportId).addOnSuccessListener(snapshots -> {
+            llStatusHistory.removeAllViews();
             if (snapshots == null || snapshots.isEmpty()) {
                 tvHistoryEmpty.setVisibility(View.VISIBLE);
                 return;
             }
+            tvHistoryEmpty.setVisibility(View.GONE);
             SimpleDateFormat sdf = new SimpleDateFormat("d MMM HH:mm", Locale.getDefault());
             for (var doc : snapshots.getDocuments()) {
                 StatusUpdate u = doc.toObject(StatusUpdate.class);
