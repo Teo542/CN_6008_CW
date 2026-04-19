@@ -30,6 +30,7 @@ import com.cityfix.models.FaultReport;
 import com.cityfix.repositories.ReportRepository;
 import com.cityfix.repositories.UserRepository;
 import com.cityfix.utils.LocationHelper;
+import com.cityfix.utils.ValidationUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
@@ -235,16 +236,14 @@ public class SubmitReportFragment extends BottomSheetDialogFragment {
         String title = etTitle.getText() != null ? etTitle.getText().toString().trim() : "";
         String description = etDescription.getText() != null ? etDescription.getText().toString().trim() : "";
 
-        if (title.isEmpty()) {
-            showError("Please enter a title.");
+        String titleError = ValidationUtils.titleError(title);
+        if (titleError != null) {
+            showError(titleError);
             return;
         }
-        if (title.length() > 100) {
-            showError("Title must be under 100 characters.");
-            return;
-        }
-        if (description.length() > 500) {
-            showError("Description must be under 500 characters.");
+        String descriptionError = ValidationUtils.descriptionError(description);
+        if (descriptionError != null) {
+            showError(descriptionError);
             return;
         }
         if (currentLat == 0 && currentLng == 0) {

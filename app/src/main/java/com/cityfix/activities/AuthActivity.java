@@ -15,6 +15,7 @@ import com.cityfix.R;
 import com.cityfix.models.User;
 import com.cityfix.repositories.UserRepository;
 import com.cityfix.utils.Constants;
+import com.cityfix.utils.ValidationUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -158,8 +159,9 @@ public class AuthActivity extends AppCompatActivity {
             return;
         }
 
-        if (password.length() < 6) {
-            showError("Password must be at least 6 characters.");
+        String passwordError = ValidationUtils.passwordError(password);
+        if (passwordError != null) {
+            showError(passwordError);
             return;
         }
 

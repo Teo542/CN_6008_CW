@@ -160,7 +160,23 @@ reports/{reportId}
 
 ## Testing / Verification
 
-This prototype is verified through build checks and manual smoke testing. A full automated test suite is not included in the coursework prototype.
+This prototype is verified through a combination of automated unit tests, Android build checks, admin portal smoke testing, and manual emulator testing. The automated tests focus on deterministic application logic that can be checked without Firebase, Google Maps, or an emulator.
+
+### Unit Tests
+Run the local JVM tests from the project root:
+```bash
+./gradlew :app:testDebugUnitTest
+```
+On Windows:
+```bash
+.\gradlew.bat :app:testDebugUnitTest
+```
+
+Current unit-test coverage:
+- `ValidationUtilsTest` checks report title, description, comment, and password boundaries.
+- `StatusFormatterTest` checks safe display text for `open`, `in_progress`, `resolved`, null, and unknown statuses.
+
+These tests were added because validation and status formatting are reused by multiple screens. Moving that logic into `ValidationUtils` and `StatusFormatter` prevents each Activity or Fragment from silently applying different rules. The tests specifically protect boundary cases such as 100-character titles, 501-character descriptions/comments, 5-character passwords, and unknown status values.
 
 ### Android Build
 Run the debug build from the project root:

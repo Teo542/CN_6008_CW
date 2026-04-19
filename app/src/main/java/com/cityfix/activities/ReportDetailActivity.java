@@ -21,6 +21,8 @@ import com.cityfix.adapters.CommentAdapter;
 import com.cityfix.models.Comment;
 import com.cityfix.models.StatusUpdate;
 import com.cityfix.repositories.ReportRepository;
+import com.cityfix.utils.StatusFormatter;
+import com.cityfix.utils.ValidationUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -85,7 +87,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         tvAddress.setText(address != null ? address : "Location unavailable");
         tvReporter.setText("Reported by: " + userName);
         tvCategory.setText(category != null ? category.toUpperCase() : "");
-        tvStatus.setText(status != null ? status.replace("_", " ").toUpperCase() : "");
+        tvStatus.setText(StatusFormatter.formatStatus(status).toUpperCase());
         if (tvStatus.getBackground() != null) tvStatus.getBackground().mutate().setTint(statusColor(status));
         if (tvCategory.getBackground() != null) tvCategory.getBackground().mutate().setTint(categoryColor(category));
 
@@ -132,7 +134,12 @@ public class ReportDetailActivity extends AppCompatActivity {
         btnSend.setOnClickListener(v -> {
             if (etComment.getText() == null) return;
             String text = etComment.getText().toString().trim();
-            if (text.isEmpty() || reportId == null) return;
+            if (reportId == null) return;
+            String commentError = ValidationUtils.commentError(text);
+            if (commentError != null) {
+                Toast.makeText(this, commentError, Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             FirebaseUser fbUser = FirebaseAuth.getInstance().getCurrentUser();
             if (fbUser == null) {
@@ -192,9 +199,8 @@ public class ReportDetailActivity extends AppCompatActivity {
                 TextView tv = new TextView(this);
                 String time = u.getTimestamp() != null
                         ? sdf.format(new Date(u.getTimestamp().toDate().getTime())) : "";
-                String prev = u.getPreviousStatus() != null ? u.getPreviousStatus().replace("_", " ") : "?";
-                String next = u.getNewStatus() != null ? u.getNewStatus().replace("_", " ") : "?";
-                tv.setText("• " + prev + " → " + next + "  (" + time + ")");
+                tv.setText("- " + StatusFormatter.formatStatusTransition(
+                        u.getPreviousStatus(), u.getNewStatus()) + "  (" + time + ")");
                 tv.setTextColor(Color.parseColor("#9E9EB8"));
                 tv.setTextSize(13f);
                 tv.setPadding(0, 4, 0, 4);
@@ -216,7 +222,7 @@ public class ReportDetailActivity extends AppCompatActivity {
                 java.util.List<?> upvoterIds = (java.util.List<?>) doc.get("upvoterIds");
                 boolean alreadyUpvoted = upvoterIds != null && upvoterIds.contains(user.getUid());
                 btn.setEnabled(!alreadyUpvoted);
-                btn.setText(alreadyUpvoted ? "✓ Upvoted" : "▲ Upvote");
+                btn.setText(alreadyUpvoted ? "Upvoted" : "Upvote");
             }
         });
     }
