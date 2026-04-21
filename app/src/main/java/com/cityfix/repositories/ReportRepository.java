@@ -135,14 +135,12 @@ public class ReportRepository {
     public Task<QuerySnapshot> getUserReports(String userId) {
         return db.collection(Constants.COLLECTION_REPORTS)
                 .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get();
     }
 
     public void listenToUserReports(String userId, MutableLiveData<List<FaultReport>> liveData) {
         ListenerRegistration reg = db.collection(Constants.COLLECTION_REPORTS)
                 .whereEqualTo("userId", userId)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) return;
                     List<FaultReport> reports = new ArrayList<>();
@@ -153,9 +151,21 @@ public class ReportRepository {
                             reports.add(report);
                         }
                     }
+                    sortReportsByTimestampDesc(reports);
                     liveData.postValue(reports);
                 });
         allListeners.add(reg);
+    }
+
+    public void sortReportsByTimestampDesc(List<FaultReport> reports) {
+        reports.sort((left, right) -> {
+            var leftTime = left.getTimestamp();
+            var rightTime = right.getTimestamp();
+            if (leftTime == null && rightTime == null) return 0;
+            if (leftTime == null) return 1;
+            if (rightTime == null) return -1;
+            return rightTime.compareTo(leftTime);
+        });
     }
 
     public void removeListener() {

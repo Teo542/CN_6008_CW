@@ -139,6 +139,7 @@ public class ProfileFragment extends Fragment {
                             }
                         }
                     }
+                    reportRepository.sortReportsByTimestampDesc(reports);
                     myReportsLiveData.postValue(reports);
                 })
                 .addOnFailureListener(e ->
