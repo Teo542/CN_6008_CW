@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cityfix.R;
 import com.cityfix.activities.ReportDetailActivity;
@@ -24,6 +26,7 @@ import com.cityfix.models.FaultReport;
 import com.cityfix.models.User;
 import com.cityfix.repositories.ReportRepository;
 import com.cityfix.repositories.UserRepository;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +47,7 @@ public class ProfileFragment extends Fragment {
 
     private TextView tvAvatar, tvDisplayName, tvEmail, tvReportsCount, tvMyReportsEmpty;
     private LinearLayout avatarContainer;
+    private SwipeRefreshLayout swipeRefresh;
 
     @Nullable
     @Override
@@ -66,6 +70,8 @@ public class ProfileFragment extends Fragment {
         tvReportsCount = view.findViewById(R.id.tv_reports_count);
         tvMyReportsEmpty = view.findViewById(R.id.tv_my_reports_empty);
         avatarContainer = view.findViewById(R.id.avatar_container);
+        swipeRefresh = view.findViewById(R.id.swipe_refresh_profile);
+        swipeRefresh.setOnRefreshListener(this::refreshUserProfile);
 
         ImageButton btnSettings = view.findViewById(R.id.btn_settings);
         btnSettings.setOnClickListener(v ->
@@ -93,6 +99,51 @@ public class ProfileFragment extends Fragment {
         if (uid == null) return;
         userRepository.listenToUser(uid, userLiveData);
         reportRepository.listenToUserReports(uid, myReportsLiveData);
+    }
+
+    private void refreshUserProfile() {
+        String uid = userRepository.getCurrentUserId();
+        if (uid == null) {
+            swipeRefresh.setRefreshing(false);
+            return;
+        }
+
+        final int[] pendingRequests = {2};
+        Runnable finishOne = () -> {
+            pendingRequests[0]--;
+            if (pendingRequests[0] == 0) {
+                swipeRefresh.setRefreshing(false);
+            }
+        };
+
+        userRepository.getUser(uid)
+                .addOnSuccessListener(doc -> {
+                    if (doc != null && doc.exists()) {
+                        User user = doc.toObject(User.class);
+                        if (user != null) userLiveData.postValue(user);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Could not refresh profile", Toast.LENGTH_SHORT).show())
+                .addOnCompleteListener(task -> finishOne.run());
+
+        reportRepository.getUserReports(uid)
+                .addOnSuccessListener(snapshots -> {
+                    List<FaultReport> reports = new ArrayList<>();
+                    if (snapshots != null) {
+                        for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                            FaultReport report = doc.toObject(FaultReport.class);
+                            if (report != null) {
+                                report.setReportId(doc.getId());
+                                reports.add(report);
+                            }
+                        }
+                    }
+                    myReportsLiveData.postValue(reports);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Could not refresh reports", Toast.LENGTH_SHORT).show())
+                .addOnCompleteListener(task -> finishOne.run());
     }
 
     private void populateUI(User user) {

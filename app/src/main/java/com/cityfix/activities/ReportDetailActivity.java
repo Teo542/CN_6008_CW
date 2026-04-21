@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cityfix.R;
 import com.cityfix.adapters.CommentAdapter;
@@ -27,6 +28,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,6 +52,10 @@ public class ReportDetailActivity extends AppCompatActivity {
     private TextView tvHistoryEmpty;
     private CommentAdapter commentAdapter;
     private TextView tvCommentsEmpty;
+    private TextView tvTitle, tvCategory, tvStatus, tvAddress, tvDescription, tvReporter;
+    private ImageView ivReportPhoto;
+    private MaterialButton btnUpvote;
+    private SwipeRefreshLayout swipeRefresh;
     private MutableLiveData<List<Comment>> commentsLiveData = new MutableLiveData<>();
 
     @Override
@@ -70,17 +76,20 @@ public class ReportDetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        TextView tvTitle = findViewById(R.id.tv_title);
-        TextView tvCategory = findViewById(R.id.tv_category);
-        TextView tvStatus = findViewById(R.id.tv_status);
-        TextView tvAddress = findViewById(R.id.tv_address);
-        TextView tvDescription = findViewById(R.id.tv_description);
-        TextView tvReporter = findViewById(R.id.tv_reporter);
+        swipeRefresh = findViewById(R.id.swipe_refresh_detail);
+        tvTitle = findViewById(R.id.tv_title);
+        tvCategory = findViewById(R.id.tv_category);
+        tvStatus = findViewById(R.id.tv_status);
+        tvAddress = findViewById(R.id.tv_address);
+        tvDescription = findViewById(R.id.tv_description);
+        tvReporter = findViewById(R.id.tv_reporter);
+        ivReportPhoto = findViewById(R.id.iv_report_photo);
         tvUpvoteCount = findViewById(R.id.tv_upvote_count);
         llStatusHistory = findViewById(R.id.ll_status_history);
         tvHistoryEmpty = findViewById(R.id.tv_history_empty);
         tvCommentsEmpty = findViewById(R.id.tv_comments_empty);
-        MaterialButton btnUpvote = findViewById(R.id.btn_upvote);
+        btnUpvote = findViewById(R.id.btn_upvote);
+        swipeRefresh.setOnRefreshListener(() -> refreshReportDetail(true));
 
         tvTitle.setText(title);
         tvDescription.setText(description);
@@ -105,9 +114,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
         reportRepository = new ReportRepository();
-        loadUpvotes();
-        loadStatusHistory();
-        loadPhoto();
+        refreshReportDetail(false);
         if (reportId != null) {
             reportRepository.listenToComments(reportId, commentsLiveData);
         }
@@ -121,7 +128,7 @@ public class ReportDetailActivity extends AppCompatActivity {
             }
             btnUpvote.setEnabled(false);
             reportRepository.upvoteReport(reportId, currentUser.getUid())
-                    .addOnSuccessListener(unused -> loadUpvotes())
+                    .addOnSuccessListener(unused -> refreshReportDetail(false))
                     .addOnFailureListener(e -> {
                         btnUpvote.setEnabled(true);
                         Toast.makeText(this, "Failed to upvote", Toast.LENGTH_SHORT).show();
@@ -163,23 +170,87 @@ public class ReportDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void loadPhoto() {
-        if (reportId == null) return;
-        reportRepository.getReport(reportId).addOnSuccessListener(doc -> {
-            if (doc == null || !doc.exists()) return;
-            String imageUrl = doc.getString("imageUrl");
-            if (imageUrl == null || imageUrl.isEmpty()) return;
-            try {
-                byte[] bytes = Base64.decode(imageUrl, Base64.DEFAULT);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                if (bitmap == null) return;
-                ImageView iv = findViewById(R.id.iv_report_photo);
-                iv.setImageBitmap(bitmap);
-                iv.setVisibility(View.VISIBLE);
-            } catch (Exception e) {
-                Toast.makeText(this, "Could not load photo", Toast.LENGTH_SHORT).show();
+    private void refreshReportDetail(boolean showErrors) {
+        if (reportId == null) {
+            if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+            return;
+        }
+
+        reportRepository.getReport(reportId)
+                .addOnSuccessListener(doc -> {
+                    if (doc == null || !doc.exists()) {
+                        if (showErrors) Toast.makeText(this, "Report not found", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    populateFromSnapshot(doc);
+                })
+                .addOnFailureListener(e -> {
+                    if (showErrors) Toast.makeText(this, "Could not refresh report", Toast.LENGTH_SHORT).show();
+                })
+                .addOnCompleteListener(task -> {
+                    loadStatusHistory();
+                    if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                });
+    }
+
+    private void populateFromSnapshot(DocumentSnapshot doc) {
+        String title = doc.getString("title");
+        String description = doc.getString("description");
+        String category = doc.getString("category");
+        String status = doc.getString("status");
+        String address = doc.getString("address");
+        String userName = doc.getString("userName");
+
+        tvTitle.setText(title != null ? title : "");
+        tvDescription.setText(description != null ? description : "");
+        tvAddress.setText(address != null ? address : "Location unavailable");
+        tvReporter.setText("Reported by: " + (userName != null ? userName : "Unknown user"));
+        tvCategory.setText(category != null ? category.toUpperCase(Locale.ROOT) : "");
+        tvStatus.setText(StatusFormatter.formatStatus(status).toUpperCase(Locale.ROOT));
+        if (tvStatus.getBackground() != null) tvStatus.getBackground().mutate().setTint(statusColor(status));
+        if (tvCategory.getBackground() != null) tvCategory.getBackground().mutate().setTint(categoryColor(category));
+
+        Long upvotes = doc.getLong("upvotes");
+        long count = upvotes != null ? upvotes : 0;
+        tvUpvoteCount.setText(count + " people agree");
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            java.util.List<?> upvoterIds = (java.util.List<?>) doc.get("upvoterIds");
+            boolean alreadyUpvoted = upvoterIds != null && upvoterIds.contains(user.getUid());
+            btnUpvote.setEnabled(!alreadyUpvoted);
+            btnUpvote.setText(alreadyUpvoted ? "Upvoted" : "Upvote");
+        } else {
+            btnUpvote.setEnabled(true);
+            btnUpvote.setText("Upvote");
+        }
+
+        loadPhotoFromSnapshot(doc);
+    }
+
+    private void loadPhotoFromSnapshot(DocumentSnapshot doc) {
+        String imageUrl = doc.getString("imageUrl");
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            ivReportPhoto.setImageDrawable(null);
+            ivReportPhoto.setVisibility(View.GONE);
+            return;
+        }
+
+        try {
+            byte[] bytes = Base64.decode(imageUrl, Base64.DEFAULT);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            if (bitmap == null) {
+                ivReportPhoto.setImageDrawable(null);
+                ivReportPhoto.setVisibility(View.GONE);
+                return;
             }
-        });
+            ivReportPhoto.setImageBitmap(bitmap);
+            ivReportPhoto.setVisibility(View.VISIBLE);
+        } catch (Exception e) {
+            ivReportPhoto.setImageDrawable(null);
+            ivReportPhoto.setVisibility(View.GONE);
+            Toast.makeText(this, "Could not load photo", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void loadStatusHistory() {
@@ -209,28 +280,16 @@ public class ReportDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void loadUpvotes() {
-        if (reportId == null) return;
-        reportRepository.getReport(reportId).addOnSuccessListener(doc -> {
-            if (doc == null || !doc.exists()) return;
-            Long upvotes = doc.getLong("upvotes");
-            long count = upvotes != null ? upvotes : 0;
-            tvUpvoteCount.setText(count + " people agree");
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            MaterialButton btn = findViewById(R.id.btn_upvote);
-            if (user != null) {
-                java.util.List<?> upvoterIds = (java.util.List<?>) doc.get("upvoterIds");
-                boolean alreadyUpvoted = upvoterIds != null && upvoterIds.contains(user.getUid());
-                btn.setEnabled(!alreadyUpvoted);
-                btn.setText(alreadyUpvoted ? "Upvoted" : "Upvote");
-            }
-        });
-    }
-
     @Override
     public boolean onSupportNavigateUp() {
         finish();
         return true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (reportRepository != null) reportRepository.removeListener();
+        super.onDestroy();
     }
 
     private int statusColor(String status) {

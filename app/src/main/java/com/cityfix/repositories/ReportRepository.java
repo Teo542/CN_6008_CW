@@ -132,6 +132,13 @@ public class ReportRepository {
         return db.collection(Constants.COLLECTION_REPORTS).document(reportId).get();
     }
 
+    public Task<QuerySnapshot> getUserReports(String userId) {
+        return db.collection(Constants.COLLECTION_REPORTS)
+                .whereEqualTo("userId", userId)
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get();
+    }
+
     public void listenToUserReports(String userId, MutableLiveData<List<FaultReport>> liveData) {
         ListenerRegistration reg = db.collection(Constants.COLLECTION_REPORTS)
                 .whereEqualTo("userId", userId)
