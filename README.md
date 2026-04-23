@@ -143,17 +143,18 @@ Open `http://localhost:8080` - log in with an account that has `role: "admin"` i
 ### 6. Open in Android Studio
 Open the project root in Android Studio - Gradle will sync automatically.
 
-### 7. Submission / Marker Setup Note
+### 7. Firebase Configuration File
 
-For coursework submission, the marker needs enough configuration to build and run the Android app as reviewed in this repository.
+The Android app requires `app/google-services.json` in order to connect to the configured Firebase project.
 
-Recommended approach:
+This file contains the Android Firebase client configuration for the app, including project identifiers and client-side SDK settings used by Firebase Authentication and Cloud Firestore.
 
-- Include `app/google-services.json` in the Moodle/source-code zip if your course rules allow it.
-- Keep `google-services.json` out of public repositories unless you intentionally want reviewers to use the same Firebase project.
-- Do **not** include privileged backend credentials such as Firebase Admin SDK service-account JSON files, `.env` secrets, or Google Cloud private keys.
+Notes:
 
-If `google-services.json` is not included in the final submission package, the marker will need to supply their own Firebase project configuration before the Android app can run successfully.
+- `google-services.json` is required for running the Android app against the configured Firebase backend.
+- It is not a Firebase Admin SDK service-account key and does not grant privileged backend access by itself.
+- It should still be handled carefully and shared only where needed.
+- If this file is missing, the project will only run after a compatible Firebase configuration file is supplied.
 
 ---
 
