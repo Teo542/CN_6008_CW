@@ -97,6 +97,22 @@ firestore.rules                     - Server-side security rules
 4. Download `google-services.json` -> place in `app/`
 5. Deploy security rules: **Firestore -> Rules** -> paste contents of `firestore.rules` -> Publish
 
+#### What `google-services.json` Does
+
+`google-services.json` is the Android Firebase client configuration file for this exact app. It tells the app which Firebase project to connect to and includes values such as:
+
+- Firebase project identifiers
+- Android app identifier/package mapping
+- API configuration used by the Firebase Android SDK
+
+Without this file, the Android app will not connect to the intended Firebase project, so authentication, Firestore reads/writes, and other Firebase-backed features will fail.
+
+Important clarification:
+
+- This file is required for the Android app to run against the configured Firebase backend.
+- It is not the same thing as a privileged Firebase Admin SDK service-account key.
+- It should still be handled carefully and only shared where needed for marking/demo/build verification.
+
 ### 2. Google Maps API Key
 1. Go to [Google Cloud Console](https://console.cloud.google.com) -> your Firebase project
 2. Enable **Maps SDK for Android**
@@ -126,6 +142,18 @@ Open `http://localhost:8080` - log in with an account that has `role: "admin"` i
 
 ### 6. Open in Android Studio
 Open the project root in Android Studio - Gradle will sync automatically.
+
+### 7. Submission / Marker Setup Note
+
+For coursework submission, the marker needs enough configuration to build and run the Android app as reviewed in this repository.
+
+Recommended approach:
+
+- Include `app/google-services.json` in the Moodle/source-code zip if your course rules allow it.
+- Keep `google-services.json` out of public repositories unless you intentionally want reviewers to use the same Firebase project.
+- Do **not** include privileged backend credentials such as Firebase Admin SDK service-account JSON files, `.env` secrets, or Google Cloud private keys.
+
+If `google-services.json` is not included in the final submission package, the marker will need to supply their own Firebase project configuration before the Android app can run successfully.
 
 ---
 
