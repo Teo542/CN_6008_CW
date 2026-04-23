@@ -63,12 +63,43 @@ public final class ValidationUtils {
     public static String passwordError(String password) {
         String value = normalize(password);
         if (value.length() < MIN_PASSWORD_LENGTH) {
-            return "Password must be at least 6 characters.";
+            return "Password must be at least 6 characters and include a letter, a number, and a symbol.";
+        }
+        if (!containsLetter(value) || !containsDigit(value) || !containsSymbol(value)) {
+            return "Password must include at least one letter, one number, and one symbol.";
         }
         return null;
     }
 
     private static String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private static boolean containsLetter(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.isLetter(value.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsDigit(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.isDigit(value.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsSymbol(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            char ch = value.charAt(i);
+            if (!Character.isLetterOrDigit(ch) && !Character.isWhitespace(ch)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

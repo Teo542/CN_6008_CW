@@ -34,10 +34,14 @@ public class ValidationUtilsTest {
     }
 
     @Test
-    public void passwordValidationMatchesFirebaseMinimum() {
+    public void passwordValidationRequiresLetterNumberAndSymbol() {
         assertFalse(ValidationUtils.isValidPassword("abcde"));
-        assertTrue(ValidationUtils.isValidPassword("abcdef"));
-        assertNull(ValidationUtils.passwordError("abcdef"));
+        assertFalse(ValidationUtils.isValidPassword("abcdef"));
+        assertFalse(ValidationUtils.isValidPassword("123456"));
+        assertFalse(ValidationUtils.isValidPassword("abc123"));
+        assertTrue(ValidationUtils.isValidPassword("abc12?"));
+        assertTrue(ValidationUtils.isValidPassword("Pass9*"));
+        assertNull(ValidationUtils.passwordError("Pass9*"));
     }
 
     private static String repeat(String value, int count) {

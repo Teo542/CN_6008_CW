@@ -11,7 +11,7 @@ This README is the technical guide for running and reviewing the repository. It 
 ## Features
 
 ### Citizens (Android App)
-- **Register / Login** via email & password (Firebase Auth)
+- **Register / Login** via email & password (Firebase Auth, with stronger registration-time password validation)
 - **Interactive Map** - colour-coded markers (red/orange/green by status); pan the map to target a precise location before submitting
 - **Submit a Report** - choose category, write title & description; location taken from map centre crosshair; attach a photo with front or back camera
 - **Feed** - scrollable list of all reports with live search and category filter chips
@@ -183,7 +183,7 @@ reports/{reportId}
 - Upvote deduplication enforced via Firestore transaction and `upvoterIds` array
 - Admin portal verifies `role: "admin"` before granting access
 - `allowBackup=false` prevents auth token extraction via ADB
-- Input validation on title (100 chars), description (500 chars), and comments (500 chars)
+- Input validation on title (100 chars), description (500 chars), comments (500 chars), and registration passwords
 
 ---
 
@@ -202,10 +202,10 @@ On Windows:
 ```
 
 Current unit-test coverage:
-- `ValidationUtilsTest` checks report title, description, comment, and password boundaries.
+- `ValidationUtilsTest` checks report title, description, comment, and password boundaries and composition.
 - `StatusFormatterTest` checks safe display text for `open`, `in_progress`, `resolved`, null, and unknown statuses.
 
-These tests were added because validation and status formatting are reused by multiple screens. Moving that logic into `ValidationUtils` and `StatusFormatter` prevents each Activity or Fragment from silently applying different rules. The tests specifically protect boundary cases such as 100-character titles, 501-character descriptions/comments, 5-character passwords, and unknown status values.
+These tests were added because validation and status formatting are reused by multiple screens. Moving that logic into `ValidationUtils` and `StatusFormatter` prevents each Activity or Fragment from silently applying different rules. The tests specifically protect boundary cases such as 100-character titles, 501-character descriptions/comments, weak passwords missing a letter/number/symbol, and unknown status values.
 
 ### Android Build
 Run the debug build from the project root:
