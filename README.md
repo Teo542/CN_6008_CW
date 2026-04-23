@@ -185,6 +185,8 @@ reports/{reportId}
 - `allowBackup=false` prevents auth token extraction via ADB
 - Input validation on title (100 chars), description (500 chars), comments (500 chars), and registration passwords
 
+New registrations must use a password with at least 6 characters, including a letter, a number, and a symbol. Existing accounts created before this validation change can continue to sign in with their current password because login is still handled by Firebase Authentication against the stored credential.
+
 ---
 
 ## Testing / Verification
