@@ -96,6 +96,11 @@ firestore.rules                     - Server-side security rules
 3. Enable **Firestore Database**
 4. Download `google-services.json` -> place in `app/`
 5. Deploy security rules: **Firestore -> Rules** -> paste contents of `firestore.rules` -> Publish
+6. If you restrict the Firebase Android API key in Google Cloud, keep the Firebase-related APIs required by the app enabled. In this project the working Android Firebase key configuration included:
+   - `Cloud Firestore API`
+   - `Identity Toolkit API`
+   - `Firebase Installations API`
+   - `Token Service API`
 
 #### What `google-services.json` Does
 
@@ -116,13 +121,16 @@ Important clarification:
 ### 2. Google Maps API Key
 1. Go to [Google Cloud Console](https://console.cloud.google.com) -> your Firebase project
 2. Enable **Maps SDK for Android**
-3. Create an API key and restrict it to **Maps SDK for Android**
+3. Create a **separate Android Maps key** and restrict it to **Maps SDK for Android**
 4. Add an Android app restriction for package `com.cityfix` and the app signing SHA-1
 5. Ensure **billing is enabled** (Maps requires it even on free tier)
 6. Paste the key into `app/src/main/res/values/strings.xml`:
    ```xml
    <string name="maps_api_key">YOUR_KEY_HERE</string>
    ```
+7. Do **not** reuse the Firebase Android key from `google-services.json` as the Maps key. The app works with a split configuration:
+   - `app/google-services.json` -> Firebase Android key
+   - `app/src/main/res/values/strings.xml` -> dedicated Maps key
 
 ### 3. Emulator Requirements
 Google Maps does **not** work on plain AOSP emulators. Use a system image tagged **Google Play Store** (Device Manager -> create device -> select Google Play system image).
@@ -139,22 +147,20 @@ cd admin
 python -m http.server 8080
 ```
 Open `http://localhost:8080` - log in with an account that has `role: "admin"` in Firestore.
+The web admin portal uses the Firebase **browser key** configured in `admin/firebase.js`, not the Android Firebase key.
 
 ### 6. Open in Android Studio
 Open the project root in Android Studio - Gradle will sync automatically.
 
-### 7. Firebase Configuration File
+### 7. Client Key Split
 
-The Android app requires `app/google-services.json` in order to connect to the configured Firebase project.
+The final working setup uses three different client-side keys:
 
-This file contains the Android Firebase client configuration for the app, including project identifiers and client-side SDK settings used by Firebase Authentication and Cloud Firestore.
+- `app/google-services.json` -> Firebase Android key used by Firebase Authentication and Cloud Firestore on Android
+- `app/src/main/res/values/strings.xml` -> dedicated Android Maps key restricted to `Maps SDK for Android`
+- `admin/firebase.js` -> browser key used by the web admin portal
 
-Notes:
-
-- `google-services.json` is required for running the Android app against the configured Firebase backend.
-- It is not a Firebase Admin SDK service-account key and does not grant privileged backend access by itself.
-- It should still be handled carefully and shared only where needed.
-- If this file is missing, the project will only run after a compatible Firebase configuration file is supplied.
+This split matters. Reusing the Android Firebase key as the Maps key or as the web admin key causes configuration and authentication failures.
 
 ---
 
@@ -184,6 +190,11 @@ reports/{reportId}
 - Admin portal verifies `role: "admin"` before granting access
 - `allowBackup=false` prevents auth token extraction via ADB
 - Input validation on title (100 chars), description (500 chars), comments (500 chars), and registration passwords
+- API keys are split by client/platform:
+  - Firebase Android key in `google-services.json`
+  - Android Maps key in `strings.xml`
+  - browser key in `admin/firebase.js`
+- The Firebase Android key must retain the Firebase APIs needed for auth/token/firestore flows; over-restricting it breaks sign-in, report writes, and real-time sync
 
 New registrations must use a password with at least 6 characters, including a letter, a number, and a symbol. Existing accounts created before this validation change can continue to sign in with their current password because login is still handled by Firebase Authentication against the stored credential.
 
