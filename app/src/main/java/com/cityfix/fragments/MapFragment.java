@@ -56,7 +56,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        viewModel = new ViewModelProvider(this).get(MapViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(MapViewModel.class);
 
         FloatingActionButton fabSubmit = view.findViewById(R.id.fab_submit);
         fabSubmit.setOnClickListener(v -> openSubmitReport());

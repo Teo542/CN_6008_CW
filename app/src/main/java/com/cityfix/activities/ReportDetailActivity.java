@@ -29,6 +29,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,6 +60,8 @@ public class ReportDetailActivity extends AppCompatActivity {
     private MaterialButton btnUpvote;
     private SwipeRefreshLayout swipeRefresh;
     private MutableLiveData<List<Comment>> commentsLiveData = new MutableLiveData<>();
+    private ListenerRegistration reportListener;
+    private ListenerRegistration statusHistoryListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +122,7 @@ public class ReportDetailActivity extends AppCompatActivity {
         refreshReportDetail(false);
         if (reportId != null) {
             reportRepository.listenToComments(reportId, commentsLiveData);
+            attachRealtimeListeners();
         }
 
         btnUpvote.setOnClickListener(v -> {
@@ -280,6 +286,48 @@ public class ReportDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void attachRealtimeListeners() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        reportListener = db.collection("reports")
+                .document(reportId)
+                .addSnapshotListener(this, (snapshot, error) -> {
+                    if (error != null || snapshot == null || !snapshot.exists()) return;
+                    populateFromSnapshot(snapshot);
+                });
+
+        statusHistoryListener = db.collection("reports")
+                .document(reportId)
+                .collection("statusHistory")
+                .orderBy("timestamp", Query.Direction.ASCENDING)
+                .addSnapshotListener(this, (snapshots, error) -> {
+                    if (error != null || snapshots == null) return;
+
+                    llStatusHistory.removeAllViews();
+                    if (snapshots.isEmpty()) {
+                        tvHistoryEmpty.setVisibility(View.VISIBLE);
+                        return;
+                    }
+
+                    tvHistoryEmpty.setVisibility(View.GONE);
+                    SimpleDateFormat sdf = new SimpleDateFormat("d MMM HH:mm", Locale.getDefault());
+                    for (var doc : snapshots.getDocuments()) {
+                        StatusUpdate u = doc.toObject(StatusUpdate.class);
+                        if (u == null) continue;
+
+                        TextView tv = new TextView(this);
+                        String time = u.getTimestamp() != null
+                                ? sdf.format(new Date(u.getTimestamp().toDate().getTime())) : "";
+                        tv.setText("- " + StatusFormatter.formatStatusTransition(
+                                u.getPreviousStatus(), u.getNewStatus()) + "  (" + time + ")");
+                        tv.setTextColor(Color.parseColor("#9E9EB8"));
+                        tv.setTextSize(13f);
+                        tv.setPadding(0, 4, 0, 4);
+                        llStatusHistory.addView(tv);
+                    }
+                });
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
         finish();
@@ -288,6 +336,8 @@ public class ReportDetailActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (reportListener != null) reportListener.remove();
+        if (statusHistoryListener != null) statusHistoryListener.remove();
         if (reportRepository != null) reportRepository.removeListener();
         super.onDestroy();
     }

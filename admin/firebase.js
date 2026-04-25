@@ -3,7 +3,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA7bgJKK5QiVoRo9s6Okk4l7kdjgDtgW8Y",
+  apiKey: "AIzaSyAGkZSS3rEwcRWzrtGEYx9lB57n5tTy2-k",
   authDomain: "cityfix-e37a4.firebaseapp.com",
   projectId: "cityfix-e37a4",
   storageBucket: "cityfix-e37a4.firebasestorage.app",
